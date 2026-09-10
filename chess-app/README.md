@@ -4,8 +4,6 @@ App de xadrez em português, num único arquivo HTML, feito para rodar no iPhone
 **sem passar pela App Store**. Funciona em qualquer navegador moderno, no
 celular ou no computador.
 
-![aba Jogar, aba Aprender, aba Táticas](#)
-
 ## O que tem dentro
 
 **Jogar** — partida completa contra o computador (quatro níveis) ou dois
@@ -13,6 +11,18 @@ jogadores no mesmo aparelho. Regras completas: roque, *en passant*, promoção,
 xeque, xeque-mate, afogamento, repetição tripla, regra dos 50 lances e material
 insuficiente. Tem dica, voltar lance, girar tabuleiro, peças capturadas com o
 saldo de material e planilha da partida em notação portuguesa (R D T B C).
+
+**Relógio** — opcional. Sem relógio, 3+2, 10+5 ou 25+10 (minutos + incremento
+por lance). O relógio de cada lado só corre na vez dele, pausa quando você sai
+da aba e dá um lance de cortesia para os dois no começo. Quem cai no tempo
+perde — a não ser que o adversário não tenha material para dar mate, e aí é
+empate, como manda a regra.
+
+**Análise** — ao fim da partida (ou durante ela), o app confere lance a lance e
+mostra um gráfico da avaliação, quantos lances bons e quantos erros cada lado
+fez, e os momentos decisivos com o lance que era melhor. Arraste o dedo pelo
+gráfico para percorrer a partida no tabuleiro. É uma análise rasa, de dois
+lances à frente: acha os erros grandes, não julga sutilezas.
 
 **Aprender** — onze lições curtas, na ordem, do tabuleiro ao xeque-mate. Cada
 uma traz tabuleiros de verdade: uns em que você toca numa peça e vê todos os
@@ -43,7 +53,9 @@ app usa as fontes do sistema.
 
 ## Rodar localmente
 
-Não tem build nem dependência. Abra `index.html` no navegador, ou sirva a pasta:
+Não tem build nem dependência. As peças são desenhadas em SVG dentro do próprio
+arquivo, então nada depende das fontes do sistema. Abra `index.html` no
+navegador, ou sirva a pasta:
 
 ```bash
 python3 -m http.server 8000    # depois: http://localhost:8000/chess-app/
@@ -72,4 +84,4 @@ testes leem diretamente do arquivo:
 | `/*ENGINE-*/` | tabuleiro 0x88, geração de lances, regras, FEN, notação |
 | `/*AI-*/` | negamax com poda alfa-beta, ordenação MVV-LVA, quiescência, tabelas de casas |
 | `/*DATA-*/` | conteúdo das lições e dos exercícios |
-| `/*UI-*/` | tabuleiro, controlador da partida, lições, táticas, abas |
+| `/*UI-*/` | peças em SVG, tabuleiro, partida, relógio, análise, lições, táticas |

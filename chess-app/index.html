@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Xadrez de Bolso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,7 +12,7 @@
   --brass:#A87A2E; --brass-soft:#F2E7CC;
   --danger:#A5312A; --danger-soft:#F6DEDB;
   --sq-light:#E6E4D6; --sq-dark:#59795E;
-  --pc-white:#FBFAF3; --pc-black:#1B2018; --pc-stroke:#22281F;
+  --pc-white:#FBFAF3; --pc-black:#1B2018; --pc-stroke:#22281F; --pc-rim:rgba(246,247,240,.42);
   --hl-last:rgba(168,122,46,.30); --hl-sel:rgba(168,122,46,.55);
   --dot:rgba(22,26,21,.30); --dot-dark:rgba(251,250,243,.42);
   --shadow:0 1px 2px rgba(22,26,21,.06), 0 6px 18px rgba(22,26,21,.07);
@@ -29,7 +30,7 @@
     --brass:#D9AD57; --brass-soft:#332913;
     --danger:#E4776C; --danger-soft:#3A1E1A;
     --sq-light:#BFBFAC; --sq-dark:#48624D;
-    --pc-white:#F6F4E9; --pc-black:#14180F; --pc-stroke:#0E120B;
+    --pc-white:#F6F4E9; --pc-black:#14180F; --pc-stroke:#0E120B; --pc-rim:rgba(233,236,227,.34);
     --hl-last:rgba(217,173,87,.28); --hl-sel:rgba(217,173,87,.50);
     --dot:rgba(20,24,15,.42); --dot-dark:rgba(246,244,233,.40);
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.35);
@@ -43,7 +44,7 @@
   --brass:#D9AD57; --brass-soft:#332913;
   --danger:#E4776C; --danger-soft:#3A1E1A;
   --sq-light:#BFBFAC; --sq-dark:#48624D;
-  --pc-white:#F6F4E9; --pc-black:#14180F; --pc-stroke:#0E120B;
+  --pc-white:#F6F4E9; --pc-black:#14180F; --pc-stroke:#0E120B; --pc-rim:rgba(233,236,227,.34);
   --hl-last:rgba(217,173,87,.28); --hl-sel:rgba(217,173,87,.50);
   --dot:rgba(20,24,15,.42); --dot-dark:rgba(246,244,233,.40);
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.35);
@@ -63,7 +64,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding-block:calc(12px + env(safe-area-inset-top,0px)) 10px}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
-.brand .mark{font-size:26px;line-height:1;color:var(--green-ink)}
+.brand .mark{width:26px;height:26px;color:var(--green-ink);flex:none}
 .brand h1{font-size:19px;line-height:1.1}
 .brand .sub{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 .badge{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--ink-2);
@@ -79,8 +80,16 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 .strip .side{width:11px;height:11px;border-radius:3px;border:1px solid var(--line-2);flex:none}
 .strip .side.w{background:var(--pc-white)}
 .strip .side.b{background:var(--pc-black)}
-.strip .taken{font-size:16px;line-height:1;color:var(--ink-3);letter-spacing:-2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.strip .taken{display:flex;align-items:center;min-width:0;overflow:hidden}
+.strip .taken .pc{width:16px;height:16px;flex:none;margin-right:-4px;filter:none;opacity:.75}
 .strip .adv{font-family:var(--f-mono);font-size:12px;color:var(--ink-2);margin-left:auto;flex:none;font-variant-numeric:tabular-nums}
+.strip .clock{font-family:var(--f-mono);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;
+  padding:4px 9px;border-radius:8px;background:var(--surface);border:1px solid var(--line);
+  color:var(--ink-3);flex:none;letter-spacing:.02em}
+.strip .clock[hidden]{display:none}
+.strip.turn .clock{background:var(--surface);border-color:var(--green);color:var(--ink)}
+.strip .clock.low{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+.strip .clock.out{opacity:.5;text-decoration:line-through}
 .strip.turn .name{color:var(--green-ink)}
 .strip.turn .name::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
   background:var(--green-ink);margin-left:6px;vertical-align:middle}
@@ -101,9 +110,15 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 .sq .co.f{right:3px;bottom:2px}
 .sq .co.r{left:3px;top:2px}
 .sq.l .co{color:var(--sq-dark)} .sq.d .co{color:var(--sq-light)}
-.pc{line-height:1;pointer-events:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.20))}
-.pc.w{color:var(--pc-white);-webkit-text-stroke:.030em var(--pc-stroke)}
-.pc.b{color:var(--pc-black);-webkit-text-stroke:.022em rgba(255,255,255,.16)}
+.pc{display:block;width:92%;height:92%;pointer-events:none;
+  filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.22))}
+.pc .sh{stroke-width:1.25;stroke-linejoin:round;stroke-linecap:round;paint-order:stroke fill}
+.pc .det{fill:none;stroke-width:1.2;stroke-linecap:round}
+.pc.w .sh{fill:var(--pc-white);stroke:var(--pc-stroke)}
+.pc.w .det{stroke:var(--pc-stroke)}
+.pc.b .sh{fill:var(--pc-black);stroke:var(--pc-rim)}
+.pc.b .det{stroke:var(--pc-rim)}
+.ico{width:1em;height:1em;display:block;fill:currentColor}
 .sq.last::before{content:"";position:absolute;inset:0;background:var(--hl-last)}
 .sq.sel::before{content:"";position:absolute;inset:0;background:var(--hl-sel)}
 .sq.check::before{content:"";position:absolute;inset:0;
@@ -124,7 +139,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 .promo .opts{display:flex;gap:6px;margin-top:10px}
 .promo button{font-size:34px;line-height:1;width:52px;height:52px;border-radius:10px;background:var(--surface-2);
   border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
-.promo button .pc{filter:none}
+.promo button .pc{width:38px;height:38px;filter:none}
 
 /* ---------- controles ---------- */
 .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
@@ -145,7 +160,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 /* ---------- status / resultado ---------- */
 .status{display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:12px;margin-bottom:10px;
   background:var(--surface);border:1px solid var(--line);font-size:13.5px;font-weight:500;min-height:44px}
-.status .ic{font-size:16px;line-height:1}
+.status .ic{font-size:17px;line-height:1;display:flex;flex:none}
 .status.alert{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
 .status.good{background:var(--green-soft);border-color:var(--green);color:var(--green-ink)}
 .status .thinking{display:inline-flex;gap:3px;margin-left:auto}
@@ -228,7 +243,8 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 .tbl{width:100%;border-collapse:collapse;font-size:13.5px}
 .tbl td{padding:8px 6px;border-bottom:1px solid var(--line);color:var(--ink-2)}
 .tbl tr:last-child td{border-bottom:0}
-.tbl td:first-child{font-size:20px;width:34px;line-height:1}
+.tbl td:first-child{width:34px}
+.tbl td:first-child .pc{width:22px;height:22px;filter:none}
 .tbl td:last-child{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--ink)}
 
 /* ---------- táticas ---------- */
@@ -245,6 +261,43 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 .puz-feed.no{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
 .puz-nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
 
+/* ---------- análise ---------- */
+.viz{ --pos:#2a78d6; --neg:#eb6834;
+  --st-good:#0ca30c; --st-warn:#fab219; --st-serious:#ec835a; --st-critical:#d03b3b; }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .viz{ --pos:#3987e5; --neg:#d95926; } }
+:root[data-theme="dark"] .viz{ --pos:#3987e5; --neg:#d95926; }
+.chart{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px 10px 8px;box-shadow:var(--shadow)}
+.chart figcaption{font-size:13px;font-weight:600;margin:0 4px 8px;color:var(--ink)}
+.chart svg{width:100%;height:auto;display:block;touch-action:pan-y}
+.chart .axis{fill:var(--ink-3);font-family:var(--f-mono);font-size:7px}
+.chart .zero{stroke:var(--line-2);stroke-width:.8}
+.chart .line{fill:none;stroke:var(--ink-2);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.chart .fpos{fill:var(--pos);opacity:.20} .chart .fneg{fill:var(--neg);opacity:.20}
+.chart .cross{stroke:var(--ink-3);stroke-width:.8;stroke-dasharray:2 2}
+.chart .cur{fill:var(--ink);stroke:var(--surface);stroke-width:1.4}
+.chart .dot{stroke:var(--surface);stroke-width:1.4}
+.chart-note{font-size:11.5px;color:var(--ink-3);margin:8px 4px 0;text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);font-size:12.5px;color:var(--ink-2)}
+.chip b{color:var(--ink);font-variant-numeric:tabular-nums}
+.chip i{width:8px;height:8px;border-radius:50%;flex:none}
+.moments{display:flex;flex-direction:column;gap:7px}
+.moment{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;
+  border-radius:11px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.moment[aria-current="true"]{border-color:var(--brass)}
+.moment i{width:8px;height:8px;border-radius:50%;flex:none}
+.moment .mv{font-family:var(--f-mono);font-size:12.5px;font-weight:600;color:var(--ink)}
+.moment .why{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.moment .cost{margin-left:auto;font-family:var(--f-mono);font-size:12px;color:var(--danger);flex:none}
+.ana-bar{height:6px;border-radius:3px;background:var(--surface-3);overflow:hidden;margin-top:10px}
+.ana-bar .fill{height:100%;background:var(--green);transition:width .2s linear}
+.analyze-row{margin-top:10px}
+.link-btn{display:block;width:100%;padding:11px;border-radius:11px;background:var(--surface);
+  border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--green-ink);box-shadow:var(--shadow)}
+.link-btn[hidden]{display:none}
+
 /* ---------- tabs ---------- */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;
   background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(14px);
@@ -252,7 +305,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 .tabbar .inner{display:grid;grid-template-columns:repeat(3,1fr);width:100%;max-width:560px}
 .tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 8px;
   font-size:10.5px;font-weight:500;color:var(--ink-3)}
-.tab .ic{font-size:19px;line-height:1}
+.tab .ic{font-size:19px;line-height:1;display:flex}
 .tab[aria-selected="true"]{color:var(--green-ink);font-weight:600}
 .view[hidden]{display:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -261,7 +314,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <span class="mark" aria-hidden="true">&#9822;&#xFE0E;</span>
+      <span class="mark" id="brandMark" aria-hidden="true"></span>
       <div>
         <h1>Xadrez de Bolso</h1>
         <p class="sub">aprender &amp; jogar</p>
@@ -290,6 +343,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
         <span class="name" id="nameTop">Computador</span>
         <span class="taken" id="takenTop"></span>
         <span class="adv" id="advTop"></span>
+        <span class="clock" id="clockTop" hidden>--:--</span>
       </div>
 
       <div class="board-wrap">
@@ -307,6 +361,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
         <span class="name" id="nameBottom">Você</span>
         <span class="taken" id="takenBottom"></span>
         <span class="adv" id="advBottom"></span>
+        <span class="clock" id="clockBottom" hidden>--:--</span>
       </div>
 
       <div class="controls">
@@ -314,6 +369,10 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
         <button class="btn" id="btnUndo"><span class="ic" aria-hidden="true">&#8630;</span>Voltar</button>
         <button class="btn" id="btnHint"><span class="ic" aria-hidden="true">&#9758;&#xFE0E;</span>Dica</button>
         <button class="btn" id="btnFlip"><span class="ic" aria-hidden="true">&#8645;</span>Girar</button>
+      </div>
+
+      <div class="analyze-row">
+        <button class="link-btn" id="btnAnalyze" hidden>Analisar partida →</button>
       </div>
 
       <details class="settings" id="settings">
@@ -342,6 +401,15 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
           </div>
         </div>
         <div class="setrow">
+          <span>Relógio</span>
+          <div class="seg" id="segClock">
+            <button data-v="0" aria-pressed="true">Sem</button>
+            <button data-v="180+2" aria-pressed="false">3+2</button>
+            <button data-v="600+5" aria-pressed="false">10+5</button>
+            <button data-v="1500+10" aria-pressed="false">25+10</button>
+          </div>
+        </div>
+        <div class="setrow">
           <span>Mostrar lances possíveis</span>
           <div class="seg" id="segHints">
             <button data-v="1" aria-pressed="true">Sim</button>
@@ -362,6 +430,42 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
         <span class="eyebrow" id="sheetInfo">notação em português</span>
       </div>
       <div class="moves" id="moves"><span class="empty">Os lances aparecem aqui conforme a partida anda.</span></div>
+    </section>
+
+    <!-- ============ ANÁLISE ============ -->
+    <section class="view viz" id="view-analysis" hidden>
+      <div class="lesson-top">
+        <button class="back" id="anaBack">‹ Partida</button>
+      </div>
+      <div class="lesson">
+        <p class="kicker">Análise da partida</p>
+        <h2 id="anaResult">Partida</h2>
+        <p class="tx" id="anaSub" style="margin-top:6px"></p>
+        <div id="anaProgress">
+          <p class="chart-note" id="anaProgressText" style="text-align:left;margin-left:0">Conferindo lance a lance…</p>
+          <div class="ana-bar"><div class="fill" id="anaFill" style="width:0%"></div></div>
+        </div>
+        <div class="blocks" id="anaBody" hidden>
+          <figure class="chart">
+            <figcaption>Avaliação lance a lance</figcaption>
+            <div id="anaChart"></div>
+            <p class="chart-note">Toque no gráfico e arraste para percorrer a partida.</p>
+          </figure>
+          <div>
+            <div class="board mini" id="anaBoard"></div>
+            <p class="mini-cap" id="anaMoveCap"></p>
+          </div>
+          <div>
+            <h3 style="margin-bottom:9px" id="anaChipsTitle">Como você jogou</h3>
+            <div class="chips" id="anaChips"></div>
+          </div>
+          <div>
+            <h3 style="margin-bottom:9px">Momentos decisivos</h3>
+            <div class="moments" id="anaMoments"></div>
+          </div>
+          <p class="note" id="anaDisclaimer"></p>
+        </div>
+      </div>
     </section>
 
     <!-- ============ APRENDER ============ -->
@@ -416,11 +520,11 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 <nav class="tabbar">
   <div class="inner" role="tablist">
     <button class="tab" role="tab" aria-selected="true" data-tab="play">
-      <span class="ic" aria-hidden="true">&#9819;&#xFE0E;</span>Jogar</button>
+      <span class="ic" data-icon="5" aria-hidden="true"></span>Jogar</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="learn">
-      <span class="ic" aria-hidden="true">&#9816;&#xFE0E;</span>Aprender</button>
+      <span class="ic" data-icon="2" aria-hidden="true"></span>Aprender</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="puzzles">
-      <span class="ic" aria-hidden="true">&#9815;&#xFE0E;</span>Táticas</button>
+      <span class="ic" data-icon="3" aria-hidden="true"></span>Táticas</button>
   </div>
 </nav>
 
@@ -1071,12 +1175,12 @@ var LESSONS = [
   ]},
   {t:"h", text:"Quanto vale cada peça"},
   {t:"table", rows:[
-    ["&#9817;","Peão","1"],
-    ["&#9816;","Cavalo","3"],
-    ["&#9815;","Bispo","3"],
-    ["&#9814;","Torre","5"],
-    ["&#9813;","Dama","9"],
-    ["&#9812;","Rei","a partida"]
+    [1,"Peão","1"],
+    [2,"Cavalo","3"],
+    [3,"Bispo","3"],
+    [4,"Torre","5"],
+    [5,"Dama","9"],
+    [6,"Rei","a partida"]
   ]},
   {t:"p", text:"Esses números decidem trocas: dar um cavalo (3) para ganhar uma torre (5) é lucro de dois pontos — os jogadores chamam isso de *ganhar a qualidade*."},
   {t:"note", text:"Os valores são um guia, não uma lei. **O par de bispos** costuma valer mais que bispo e cavalo, e um peão prestes a promover pode valer mais que uma torre."}
@@ -1216,7 +1320,53 @@ PUZZLES.splice(9, 0, PAWN_FORK);
 (function(){
 "use strict";
 var $ = function(id){ return document.getElementById(id); };
-var GLYPH = {1:"♟︎",2:"♞︎",3:"♝︎",4:"♜︎",5:"♛︎",6:"♚︎"};
+/* ---------- peças desenhadas em SVG (caixa 45x45) ----------
+   Base comum (saia + pé) para todas; o topo é o que distingue cada peça. */
+var P_FOOT = '<path class="sh" d="M14 34.5h17l2.5 5h-22z"/>' +
+             '<rect class="sh" x="10" y="39.4" width="25" height="3.6" rx="1.7"/>';
+var P_TOP = {
+  1:'<circle class="sh" cx="22.5" cy="13" r="5.2"/>' +
+    '<path class="sh" d="M18.6 17.8h7.8l3.1 16.7h-14z"/>',
+  2:'<path class="sh" d="M14 34.5C14 26 16 21 21.5 18.5c-2.5-.5-5 .3-6.9 1.7l-2.8 2.1c-.9.7-2-.2-1.6-1.3l2-5.4c1.4-3.7 4.6-6.3 8.4-7l1.2-3.1 1.6 2.9 2.2-2.6.7 3.1c4.6 1.3 7.7 5.4 7.7 10.2v15.4z"/>' +
+    '<circle class="det" cx="17.6" cy="15.2" r="1.1" style="fill:currentColor;stroke:none"/>',
+  3:'<circle class="sh" cx="22.5" cy="6.4" r="1.9"/>' +
+    '<path class="sh" d="M22.5 8.6c4.2 3.4 6.8 6.6 6.8 10.4 0 3.7-3 6.3-6.8 6.3s-6.8-2.6-6.8-6.3c0-3.8 2.6-7 6.8-10.4z"/>' +
+    '<path class="det" d="M20 17.6l5-4.8"/>' +
+    '<rect class="sh" x="16" y="25" width="13" height="2.9" rx="1.2"/>' +
+    '<path class="sh" d="M17.6 27.9h9.8l2.4 6.6h-14.6z"/>',
+  4:'<path class="sh" d="M13 8h4.5v3.5h2.8V8h4.4v3.5h2.8V8H32v7.5H13z"/>' +
+    '<path class="sh" d="M15.2 15.5h14.6l1.8 19h-18.2z"/>',
+  5:'<circle class="sh" cx="10.5" cy="11.6" r="2"/><circle class="sh" cx="16.5" cy="9.6" r="2"/>' +
+    '<circle class="sh" cx="22.5" cy="8.4" r="2.2"/><circle class="sh" cx="28.5" cy="9.6" r="2"/>' +
+    '<circle class="sh" cx="34.5" cy="11.6" r="2"/>' +
+    '<path class="sh" d="M10.5 11.6L14.4 23h16.2l3.9-11.4L30 18.5 28.5 9.6 25.5 18.5 22.5 8.8 19.5 18.5 16.5 9.6 15 18.5z"/>' +
+    '<rect class="sh" x="13.6" y="22.9" width="17.8" height="3.1" rx="1.3"/>' +
+    '<path class="sh" d="M15 26h15l1.5 8.5h-18z"/>',
+  6:'<path class="sh" d="M21.2 3.5h2.6v3h3v2.6h-3v3.2h-2.6V9.1h-3V6.5h3z"/>' +
+    '<path class="sh" d="M22.5 13.5c5.5 0 9.5 3.4 9.5 7.6 0 2.4-1.2 4.3-2.6 5.6H15.6c-1.4-1.3-2.6-3.2-2.6-5.6 0-4.2 4-7.6 9.5-7.6z"/>' +
+    '<rect class="sh" x="14.4" y="26.6" width="16.2" height="3.1" rx="1.3"/>' +
+    '<path class="sh" d="M15.6 29.7h13.8l1.6 4.8h-17z"/>'
+};
+var PIECE_CACHE = {};
+function pieceNode(t, color){
+  var key = t + (color === WHITE ? "w" : "b");
+  if(!PIECE_CACHE[key]){
+    var tpl = document.createElement("div");
+    tpl.innerHTML = '<svg class="pc ' + (color === WHITE ? "w" : "b") + '" viewBox="0 0 45 45" ' +
+      'xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' + P_TOP[t] + P_FOOT + "</svg>";
+    PIECE_CACHE[key] = tpl.firstChild;
+  }
+  return PIECE_CACHE[key].cloneNode(true);
+}
+function pieceHTML(t, color){
+  return '<svg class="pc ' + (color === WHITE ? "w" : "b") + '" viewBox="0 0 45 45" aria-hidden="true">' +
+    P_TOP[t] + P_FOOT + "</svg>";
+}
+/* ícone chapado, na cor do texto — para abas, status e marca */
+function iconHTML(t){
+  return '<svg class="ico" viewBox="0 0 45 45" aria-hidden="true">' +
+    (P_TOP[t] + P_FOOT).replace(/class="sh"/g, "").replace(/<path class="det"[^>]*>/g, "") + "</svg>";
+}
 var NAMES = {1:"peão",2:"cavalo",3:"bispo",4:"torre",5:"dama",6:"rei"};
 
 /* ---------- iPhone: tela cheia e ícone na tela de início ---------- */
@@ -1256,7 +1406,7 @@ function load(){ try{ return JSON.parse(localStorage.getItem(STORE)) || {}; }cat
 function save(){
   try{
     localStorage.setItem(STORE, JSON.stringify({
-      moves:G.uci, mode:G.mode, level:G.level, side:G.side, flip:G.flip,
+      moves:G.uci, mode:G.mode, level:G.level, side:G.side, flip:G.flip, clockCfg:G.clockCfg,
       hints:G.hints, sound:G.sound, installHidden:G.installHidden,
       done:Object.keys(G.done), solved:Object.keys(G.solved)
     }));
@@ -1313,10 +1463,7 @@ function renderBoard(el, st, o){
       }
       var p = st.b[sq];
       if(p){
-        var sp = document.createElement("span");
-        sp.className = "pc " + (pColor(p) === WHITE ? "w" : "b");
-        sp.textContent = GLYPH[pType(p)];
-        d.appendChild(sp);
+        d.appendChild(pieceNode(pType(p), pColor(p)));
         d.setAttribute("aria-label", sqName(sq) + ": " + (pColor(p)===WHITE?"branca ":"preta ") + NAMES[pType(p)]);
       } else {
         d.setAttribute("aria-label", sqName(sq) + ": vazia");
@@ -1344,8 +1491,97 @@ function sqFromEvent(e){
 var G = {
   st:null, uci:[], sans:[], sel:-1, targets:[], last:null, thinking:false,
   mode:"ai", level:2, side:WHITE, flip:false, hints:true, sound:true,
-  pending:null, hintMove:null, installHidden:false, done:{}, solved:{}, over:null
+  pending:null, hintMove:null, installHidden:false, done:{}, solved:{}, over:null,
+  clockCfg:"0", clock:null, clockHist:[], timeout:null
 };
+
+/* ---------- relógio ---------- */
+function clockOn(){ return G.clockCfg !== "0"; }
+function clockInit(){
+  G.timeout = null; G.clockHist = [];
+  if(!clockOn()){ G.clock = null; return; }
+  var p = G.clockCfg.split("+"), base = +p[0] * 1000;
+  G.clock = {ms:[base, base], inc:(+p[1] || 0) * 1000, side:WHITE, since:0, running:false};
+}
+function clockLeft(color){
+  var c = G.clock;
+  if(!c) return 0;
+  var t = c.ms[color];
+  if(c.running && c.side === color) t -= (Date.now() - c.since);
+  return Math.max(0, t);
+}
+function clockPause(){
+  var c = G.clock;
+  if(!c || !c.running) return;
+  c.ms[c.side] = Math.max(0, c.ms[c.side] - (Date.now() - c.since));
+  c.running = false;
+}
+function clockResume(){
+  var c = G.clock;
+  if(!c || c.running || G.over || G.timeout || G.uci.length < 2) return;
+  c.side = G.st.turn; c.since = Date.now(); c.running = true;
+}
+/* chamado depois de cada lance: cobra o tempo de quem jogou e passa a vez */
+function clockAfterMove(mover){
+  var c = G.clock;
+  if(!c) return;
+  if(c.running && c.side === mover){
+    c.ms[mover] = Math.max(0, c.ms[mover] - (Date.now() - c.since)) + c.inc;
+  }
+  c.side = 1 - mover; c.since = Date.now();
+  c.running = !G.over && !G.timeout && G.uci.length >= 2;
+}
+/* material suficiente para dar mate — quem não tem, empata quando o outro cai no tempo */
+function canMate(st, color){
+  var minors = 0, b = st.b;
+  for(var i=0;i<128;i++){
+    if(i & 0x88){ i += 7; continue; }
+    var p = b[i];
+    if(!p || pColor(p) !== color) continue;
+    var t = pType(p);
+    if(t === PAWN || t === ROOK || t === QUEEN) return true;
+    if(t === KNIGHT || t === BISHOP) minors++;
+  }
+  return minors >= 2;
+}
+function onFlag(loser){
+  clockPause();
+  G.clock.ms[loser] = 0;
+  G.timeout = {loser:loser, draw:!canMate(G.st, 1-loser)};
+  G.sel = -1; G.targets = [];
+  sfx(G.timeout.draw ? "bad" : "win");
+  drawGame();
+}
+function fmtClock(ms){
+  if(ms <= 0) return "0:00";
+  var s = ms / 1000;
+  if(s < 20) return Math.floor(s/60) + ":" + ("0" + Math.floor(s%60)).slice(-2) + "." + Math.floor((s*10)%10);
+  var m = Math.floor(s/60);
+  return m + ":" + ("0" + Math.floor(s%60)).slice(-2);
+}
+function paintClocks(){
+  var bottomColor = G.flip ? BLACK : WHITE;
+  [["clockBottom", bottomColor], ["clockTop", 1 - bottomColor]].forEach(function(pair){
+    var el = $(pair[0]), color = pair[1];
+    if(!clockOn()){ el.hidden = true; return; }
+    el.hidden = false;
+    var left = clockLeft(color);
+    el.textContent = fmtClock(left);
+    el.classList.toggle("low", left < 30000 && left > 0);
+    el.classList.toggle("out", left <= 0);
+  });
+}
+setInterval(function(){
+  if(!G.clock || !G.clock.running) return;
+  if($("view-play").hidden){ clockPause(); return; }
+  paintClocks();
+  var side = G.clock.side;
+  if(clockLeft(side) <= 0) onFlag(side);
+}, 200);
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden) clockPause();
+  else if(!$("view-play").hidden) clockResume();
+});
 
 function humanTurn(){ return G.mode === "human" || G.st.turn === G.side; }
 
@@ -1353,6 +1589,8 @@ function newGame(keepSettings){
   G.st = fenToState(START_FEN);
   G.uci = []; G.sans = []; G.sel = -1; G.targets = []; G.last = null;
   G.hintMove = null; G.over = null; G.pending = null; G.thinking = false;
+  G.analysis = null;
+  clockInit();
   $("promo").hidden = true;
   G.flip = (G.mode === "ai" && G.side === BLACK);
   drawGame();
@@ -1384,7 +1622,7 @@ function askPromotion(opts){
   box.textContent = "";
   [QUEEN, ROOK, BISHOP, KNIGHT].forEach(function(t){
     var b = document.createElement("button");
-    b.innerHTML = '<span class="pc ' + (G.st.turn === WHITE ? "w" : "b") + '">' + GLYPH[t] + "</span>";
+    b.innerHTML = pieceHTML(t, G.st.turn);
     b.setAttribute("aria-label", "Promover para " + NAMES[t]);
     b.onclick = function(){
       var m = opts.filter(function(o){ return o.promo === t; })[0];
@@ -1397,11 +1635,16 @@ function askPromotion(opts){
 }
 
 function applyMove(m){
-  var san = moveToSan(G.st, m), cap = m.flags & F_CAPTURE;
+  var san = moveToSan(G.st, m), cap = m.flags & F_CAPTURE, mover = G.st.turn;
+  if(G.clock) G.clockHist.push([G.clock.ms[0], G.clock.ms[1], G.clock.running]);
   makeMove(G.st, m);
   G.uci.push(moveToUci(m)); G.sans.push(san);
   G.last = [m.from, m.to]; G.sel = -1; G.targets = []; G.hintMove = null;
   var s = gameStatus(G.st);
+  G.over = s.over ? s : null;
+  G.analysis = null;
+  clockAfterMove(mover);
+  if(s.over) clockPause();
   if(s.over && s.kind === "mate") sfx("win");
   else if(s.check) sfx("check");
   else sfx(cap ? "capture" : "move");
@@ -1428,10 +1671,14 @@ function undo(){
   var n = (G.mode === "ai" && G.uci.length >= 2 && G.st.turn === G.side) ? 2 : 1;
   for(var i=0;i<n && G.uci.length;i++){
     unmakeMove(G.st); G.uci.pop(); G.sans.pop();
+    var snap = G.clockHist.pop();
+    if(snap && G.clock){ G.clock.ms[0] = snap[0]; G.clock.ms[1] = snap[1]; }
   }
+  G.timeout = null;
+  if(G.clock){ G.clock.side = G.st.turn; G.clock.since = Date.now(); G.clock.running = false; }
   var h = G.st.hist[G.st.hist.length-1];
   G.last = h ? [h.m.from, h.m.to] : null;
-  G.sel = -1; G.targets = []; G.over = null; G.hintMove = null;
+  G.sel = -1; G.targets = []; G.over = null; G.hintMove = null; G.analysis = null;
   drawGame(); save();
   if(G.mode === "ai" && G.st.turn !== G.side) maybeAI();
 }
@@ -1475,23 +1722,31 @@ function material(st){
 function statusInfo(){
   var s = gameStatus(G.st);
   G.over = s.over ? s : null;
+  if(G.timeout){
+    G.over = {over:true, kind:"tempo"};
+    var who = G.timeout.loser === WHITE ? "brancas" : "pretas";
+    if(G.timeout.draw)
+      return {cls:"", ic:"<span>½</span>", text:"Tempo das " + who + " esgotado — empate, o adversário não tem como dar mate"};
+    var win = G.timeout.loser === WHITE ? "pretas" : "brancas";
+    return {cls:"good", ic:iconHTML(6), text:"Tempo esgotado — as " + win + " venceram"};
+  }
   var whiteName = (G.mode === "ai") ? (G.side === WHITE ? "Você" : "Computador") : "Brancas";
   var blackName = (G.mode === "ai") ? (G.side === BLACK ? "Você" : "Computador") : "Pretas";
   var mover = G.st.turn === WHITE ? whiteName : blackName;
   if(s.over){
     if(s.kind === "mate"){
       var w = s.winner === WHITE ? whiteName : blackName;
-      return {cls:"good", ic:"♚︎", text:"Xeque-mate — " + w + (w === "Você" ? " venceu!" : " venceram") };
+      return {cls:"good", ic:iconHTML(6), text:"Xeque-mate — " + w + (w === "Você" ? " venceu!" : " venceram") };
     }
     if(s.kind === "afogamento") return {cls:"", ic:"½", text:"Empate por afogamento — sem xeque e sem lance legal"};
-    if(s.kind === "50")         return {cls:"", ic:"½", text:"Empate pela regra dos 50 lances"};
-    if(s.kind === "repeticao")  return {cls:"", ic:"½", text:"Empate por repetição tripla"};
-    return {cls:"", ic:"½", text:"Empate por material insuficiente"};
+    if(s.kind === "50")         return {cls:"", ic:"<span>½</span>", text:"Empate pela regra dos 50 lances"};
+    if(s.kind === "repeticao")  return {cls:"", ic:"<span>½</span>", text:"Empate por repetição tripla"};
+    return {cls:"", ic:"<span>½</span>", text:"Empate por material insuficiente"};
   }
-  if(G.thinking) return {cls:"", ic:"♞︎", text:"Pensando…", busy:true};
-  if(s.check) return {cls:"alert", ic:"!", text:"Xeque! " + mover + (mover === "Você" ? " precisa" : " precisam") + " salvar o rei"};
-  if(G.hintMove) return {cls:"", ic:"☞︎", text:"Dica: jogue " + moveToSan(G.st, G.hintMove)};
-  return {cls:"", ic:G.st.turn === WHITE ? "♔︎" : "♚︎",
+  if(G.thinking) return {cls:"", ic:iconHTML(2), text:"Pensando…", busy:true};
+  if(s.check) return {cls:"alert", ic:"<span>!</span>", text:"Xeque! " + mover + (mover === "Você" ? " precisa" : " precisam") + " salvar o rei"};
+  if(G.hintMove) return {cls:"", ic:"<span>☞</span>", text:"Dica: jogue " + moveToSan(G.st, G.hintMove)};
+  return {cls:"", ic:iconHTML(6),
           text:(mover === "Você" ? "Sua vez" : "Vez de " + mover) + " · " + (G.st.turn === WHITE ? "brancas" : "pretas")};
 }
 
@@ -1519,7 +1774,7 @@ function drawGame(){
       ? (isYou ? "Você" : LEVELS[G.level].name + " (nível " + G.level + ")")
       : (color === WHITE ? "Brancas" : "Pretas");
     el.querySelector(".taken").innerHTML = m.lost[1-color].map(function(t){
-      return '<span class="pc ' + (color === WHITE ? "b" : "w") + '">' + GLYPH[t] + "</span>";
+      return pieceHTML(t, color === WHITE ? BLACK : WHITE);
     }).join("");
     var d = color === WHITE ? m.diff : -m.diff;
     el.querySelector(".adv").textContent = d > 0 ? "+" + d : "";
@@ -1527,7 +1782,12 @@ function drawGame(){
   }
   strip("stripTop", topColor);
   strip("stripBottom", bottomColor);
+  paintClocks();
 
+  var ab = $("btnAnalyze");
+  ab.hidden = G.uci.length < 2;
+  ab.textContent = G.over ? "Ver análise da partida →" : "Analisar partida →";
+  ab.className = G.over ? "btn-wide" : "link-btn";
   $("btnUndo").disabled = !G.uci.length || G.thinking;
   $("btnHint").disabled = !!G.over || G.thinking || !humanTurn();
   $("topBadge").textContent = G.mode === "ai"
@@ -1682,7 +1942,7 @@ function openLesson(i){
       el = document.createElement("table"); el.className = "tbl";
       blk.rows.forEach(function(r){
         var tr = document.createElement("tr");
-        tr.innerHTML = '<td><span class="pc b">' + r[0] + "</span></td><td>" + r[1] + "</td><td>" + r[2] + "</td>";
+        tr.innerHTML = "<td>" + pieceHTML(r[0], BLACK) + "</td><td>" + r[1] + "</td><td>" + r[2] + "</td>";
         el.appendChild(tr);
       });
     }
@@ -1808,7 +2068,7 @@ function puzPromotion(opts){
   box.textContent = "";
   [QUEEN, ROOK, BISHOP, KNIGHT].forEach(function(t){
     var b = document.createElement("button");
-    b.innerHTML = '<span class="pc ' + (P.st.turn === WHITE ? "w" : "b") + '">' + GLYPH[t] + "</span>";
+    b.innerHTML = pieceHTML(t, P.st.turn);
     b.onclick = function(){
       var m = opts.filter(function(o){ return o.promo === t; })[0];
       P.pending = null; $("puzPromo").hidden = true;
@@ -1902,15 +2162,227 @@ function solvePuzzle(){
   });
 }
 
+
+/* ---------- análise pós-partida ---------- */
+var CLASSES = [
+  {max:20,  key:"melhor",    label:"melhores lances",  color:"var(--st-good)"},
+  {max:60,  key:"boa",       label:"lances bons",      color:"var(--st-good)"},
+  {max:130, key:"imprecisao",label:"imprecisões",      color:"var(--st-warn)"},
+  {max:300, key:"erro",      label:"erros",            color:"var(--st-serious)"},
+  {max:1e9, key:"grave",     label:"erros graves",     color:"var(--st-critical)"}
+];
+function classify(loss){
+  for(var i=0;i<CLASSES.length;i++) if(loss < CLASSES[i].max) return CLASSES[i];
+  return CLASSES[CLASSES.length-1];
+}
+var A = {rows:[], fens:[], cps:[], cur:0, running:false};
+
+/* uma busca por posição: a avaliação depois do lance i é também
+   a referência do lance i+1, então nada é calculado duas vezes */
+function runAnalysis(){
+  var st = fenToState(START_FEN);
+  A.rows = []; A.fens = [stateToFen(st)]; A.cps = []; A.cur = 0; A.running = true;
+  var evals = [], bests = [], i = 0, total = G.uci.length;
+  function measure(){
+    var r = searchBest(st, 2, 900, true, 0);
+    evals.push(r ? r.score : 0);
+    bests.push(r && r.move ? {uci:moveToUci(r.move), san:moveToSan(st, r.move)} : null);
+  }
+  measure();
+  A.cps.push(0);
+  function step(){
+    if(!A.running) return;
+    var budget = 2;
+    while(budget-- > 0 && i < total){
+      var m = findMoveByUci(st, G.uci[i]);
+      if(!m){ i = total; break; }
+      var mover = st.turn, san = moveToSan(st, m), best = bests[i], ref = evals[i];
+      makeMove(st, m);
+      A.fens.push(stateToFen(st));
+      measure();
+      var played = -evals[i+1];
+      var cp = mover === WHITE ? played : -played;
+      A.cps.push(Math.max(-1200, Math.min(1200, cp)));
+      var loss = Math.max(0, ref - played);
+      var isBest = best && best.uci === G.uci[i];
+      A.rows.push({ply:i, mover:mover, san:san, loss:isBest ? 0 : loss,
+                   best:best ? best.san : "", cls:classify(isBest ? 0 : loss)});
+      i++;
+    }
+    var pct = Math.round(i / Math.max(1, total) * 100);
+    $("anaFill").style.width = pct + "%";
+    $("anaProgressText").textContent = "Conferindo lance a lance… " + pct + "%";
+    if(i < total) setTimeout(step, 0);
+    else { A.running = false; $("anaProgress").hidden = true; $("anaBody").hidden = false; paintAnalysis(); }
+  }
+  setTimeout(step, 30);
+}
+
+function evalLabel(cp){
+  if(Math.abs(cp) < 20) return "equilibrado";
+  var v = (Math.abs(cp) / 100).toFixed(1);
+  return (cp > 0 ? "brancas +" : "pretas +") + v;
+}
+
+function chartSVG(){
+  var n = A.cps.length, W = 320, H = 132, x0 = 30, x1 = 314, y0 = 61, half = 51;
+  var maxAbs = 200, maxUp = 0, maxDn = 0;
+  A.cps.forEach(function(c){
+    maxAbs = Math.max(maxAbs, Math.abs(c));
+    if(c > 0) maxUp = Math.max(maxUp, c); else maxDn = Math.max(maxDn, -c);
+  });
+  var dom = Math.min(1000, Math.ceil(maxAbs / 100) * 100);
+  var xOf = function(i){ return n < 2 ? x0 : x0 + i * (x1 - x0) / (n - 1); };
+  var yOf = function(cp){ return y0 - Math.max(-1, Math.min(1, cp / dom)) * half; };
+  var pts = A.cps.map(function(c, i){ return xOf(i).toFixed(1) + " " + yOf(c).toFixed(1); });
+  var line = "M" + pts.join("L");
+  var area = line + "L" + xOf(n-1).toFixed(1) + " " + y0 + "L" + xOf(0).toFixed(1) + " " + y0 + "Z";
+  /* marcas dos lances mais caros, com anel da superfície */
+  var dots = A.rows.filter(function(r){ return r.cls.key === "grave" || r.cls.key === "erro"; })
+    .map(function(r){
+      return '<circle class="dot" cx="' + xOf(r.ply+1).toFixed(1) + '" cy="' + yOf(A.cps[r.ply+1]).toFixed(1) +
+             '" r="3.1" fill="' + r.cls.color + '"/>';
+    }).join("");
+  /* números de lance no eixo */
+  var ticks = "";
+  var totalMoves = Math.ceil(G.uci.length / 2);
+  var stepMove = totalMoves <= 12 ? 4 : totalMoves <= 30 ? 10 : 20;
+  for(var mv = stepMove; mv <= totalMoves; mv += stepMove){
+    var idx = Math.min(n - 1, mv * 2);
+    ticks += '<text class="axis" x="' + xOf(idx).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle">' + mv + "</text>";
+  }
+  return '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Avaliação da partida lance a lance">' +
+    '<defs>' +
+      '<clipPath id="clipUp"><rect x="0" y="0" width="' + W + '" height="' + y0 + '"/></clipPath>' +
+      '<clipPath id="clipDn"><rect x="0" y="' + y0 + '" width="' + W + '" height="' + (H - y0) + '"/></clipPath>' +
+    "</defs>" +
+    '<path class="fpos" d="' + area + '" clip-path="url(#clipUp)"/>' +
+    '<path class="fneg" d="' + area + '" clip-path="url(#clipDn)"/>' +
+    '<line class="zero" x1="' + x0 + '" y1="' + y0 + '" x2="' + x1 + '" y2="' + y0 + '"/>' +
+    '<path class="line" d="' + line + '"/>' + dots +
+    (maxUp >= dom * .8 ? '<text class="axis" x="' + (x0 - 4) + '" y="14" text-anchor="end">+' + (dom/100) + "</text>" : "") +
+    '<text class="axis" x="' + (x0 - 4) + '" y="' + (y0 + 3) + '" text-anchor="end">0</text>' +
+    (maxDn >= dom * .8 ? '<text class="axis" x="' + (x0 - 4) + '" y="' + (y0 + half + 3) + '" text-anchor="end">-' + (dom/100) + "</text>" : "") +
+    '<text class="axis" x="' + (x0 + 3) + '" y="14">brancas melhor</text>' +
+    '<text class="axis" x="' + (x0 + 3) + '" y="' + (y0 + half - 2) + '">pretas melhor</text>' +
+    '<text class="axis" x="' + (x1) + '" y="' + (H - 6) + '" text-anchor="end">lance</text>' + ticks +
+    '<line class="cross" id="anaCross" x1="' + x0 + '" y1="8" x2="' + x0 + '" y2="' + (y0 + half + 4) + '"/>' +
+    '<circle class="cur" id="anaCur" cx="' + xOf(0) + '" cy="' + yOf(A.cps[0]) + '" r="3.4"/>' +
+    '<rect id="anaHit" x="' + x0 + '" y="0" width="' + (x1 - x0) + '" height="' + (y0 + half + 6) +
+      '" fill="transparent" style="cursor:ew-resize"/>' +
+    "</svg>";
+}
+
+function setPly(k){
+  var n = A.cps.length;
+  A.cur = Math.max(0, Math.min(n - 1, k));
+  var svg = $("anaChart").querySelector("svg");
+  if(svg){
+    var W = 320, x0 = 30, x1 = 314, y0 = 61, half = 51;
+    var maxAbs = 200;
+    A.cps.forEach(function(c){ maxAbs = Math.max(maxAbs, Math.abs(c)); });
+    var dom = Math.min(1000, Math.ceil(maxAbs / 100) * 100);
+    var x = n < 2 ? x0 : x0 + A.cur * (x1 - x0) / (n - 1);
+    var y = y0 - Math.max(-1, Math.min(1, A.cps[A.cur] / dom)) * half;
+    var cross = svg.querySelector("#anaCross"), cur = svg.querySelector("#anaCur");
+    cross.setAttribute("x1", x); cross.setAttribute("x2", x);
+    cur.setAttribute("cx", x); cur.setAttribute("cy", y);
+  }
+  renderBoard($("anaBoard"), fenToState(A.fens[A.cur]), {flip:G.flip});
+  var row = A.cur > 0 ? A.rows[A.cur - 1] : null;
+  var num = row ? (Math.floor(row.ply / 2) + 1) + (row.mover === WHITE ? "." : "…") : "";
+  $("anaMoveCap").innerHTML = row
+    ? "<strong>" + num + " " + row.san + "</strong> · " + evalLabel(A.cps[A.cur]) +
+      (row.loss >= 60 && row.best ? " · melhor era <strong>" + row.best + "</strong>" : "")
+    : "Posição inicial · " + evalLabel(A.cps[0]);
+  Array.prototype.forEach.call($("anaMoments").children, function(el){
+    el.setAttribute("aria-current", String(+el.dataset.ply + 1 === A.cur));
+  });
+}
+
+function paintAnalysis(){
+  $("anaChart").innerHTML = chartSVG();
+  var hit = $("anaChart").querySelector("#anaHit");
+  function scrub(e){
+    var r = $("anaChart").querySelector("svg").getBoundingClientRect();
+    var px = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    var frac = (px / r.width - 30/320) / ((314 - 30)/320);
+    setPly(Math.round(frac * (A.cps.length - 1)));
+  }
+  var dragging = false;
+  hit.addEventListener("pointerdown", function(e){ dragging = true; hit.setPointerCapture(e.pointerId); scrub(e); });
+  hit.addEventListener("pointermove", function(e){ if(dragging) scrub(e); });
+  hit.addEventListener("pointerup", function(){ dragging = false; });
+  hit.addEventListener("pointercancel", function(){ dragging = false; });
+
+  /* resumo por classe — cor sempre acompanhada de rótulo */
+  var mine = G.mode === "ai" ? G.side : null;
+  var rows = A.rows.filter(function(r){ return mine === null ? r.mover === WHITE : r.mover === mine; });
+  $("anaChipsTitle").textContent = G.mode === "ai" ? "Como você jogou" : "Como as brancas jogaram";
+  var counts = {};
+  rows.forEach(function(r){ counts[r.cls.key] = (counts[r.cls.key] || 0) + 1; });
+  $("anaChips").innerHTML = CLASSES.map(function(c){
+      return {c:c, n:counts[c.key] || 0};
+    }).filter(function(o, i){
+      return o.n > 0 || i === 0;
+    }).map(function(o){
+      return '<span class="chip"><i style="background:' + o.c.color + '"></i><b>' + o.n + "</b> " + o.c.label + "</span>";
+    }).join("");
+
+  /* momentos decisivos: os lances mais caros */
+  var worst = rows.slice().sort(function(a, b){ return b.loss - a.loss; })
+                  .filter(function(r){ return r.loss >= 60; }).slice(0, 5);
+  $("anaMoments").innerHTML = worst.length ? worst.map(function(r){
+    var num = (Math.floor(r.ply / 2) + 1) + (r.mover === WHITE ? "." : "…");
+    return '<button class="moment" data-ply="' + r.ply + '"><i style="background:' + r.cls.color + '"></i>' +
+      "<span><span class='mv'>" + num + " " + r.san + "</span>" +
+      "<span class='why'>" + (r.best ? "melhor era " + r.best : "") + "</span></span>" +
+      "<span class='cost'>−" + (r.loss / 100).toFixed(1) + "</span></button>";
+  }).join("") : '<p class="tx">Nenhum erro grande nesta partida. Bom sinal.</p>';
+  Array.prototype.forEach.call($("anaMoments").children, function(el){
+    if(el.dataset.ply !== undefined) el.onclick = function(){ setPly(+el.dataset.ply + 1); };
+  });
+
+  $("anaDisclaimer").innerHTML = "<b>Como ler isto:</b> a análise olha dois lances à frente. " +
+    "Ela acha os erros grandes com segurança, mas não julga sutilezas de posição — para isso, " +
+    "um motor forte de verdade é outro assunto.";
+  setPly(A.cps.length - 1);
+}
+
+function openAnalysis(){
+  clockPause();
+  ["play","learn","puzzles"].forEach(function(t){ $("view-" + t).hidden = true; });
+  $("view-analysis").hidden = false;
+  window.scrollTo(0, 0);
+  var st = statusInfo();
+  $("anaResult").textContent = G.over ? st.text.replace(/^.*?— /, "").replace(/^./, function(c){ return c.toUpperCase(); }) : "Partida em andamento";
+  var moves = Math.ceil(G.uci.length / 2);
+  $("anaSub").textContent = moves + (moves === 1 ? " lance jogado" : " lances jogados") +
+    (G.mode === "ai" ? " contra o " + LEVELS[G.level].name.toLowerCase() + " (nível " + G.level + ")" : " no modo dois jogadores") + ".";
+  $("anaProgress").hidden = false;
+  $("anaBody").hidden = true;
+  $("anaFill").style.width = "0%";
+  runAnalysis();
+}
+function closeAnalysis(){
+  A.running = false;
+  $("view-analysis").hidden = true;
+  $("view-play").hidden = false;
+  window.scrollTo(0, 0);
+  clockResume();
+}
+
 /* ---------- abas ---------- */
 function showTab(name){
-  ["play","learn","puzzles"].forEach(function(t){
+  A.running = false;
+  ["play","learn","puzzles","analysis"].forEach(function(t){
     $("view-" + t).hidden = t !== name;
   });
   Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(b){
     b.setAttribute("aria-selected", String(b.dataset.tab === name));
   });
   if(name === "puzzles" && !P.st) loadPuzzle(0);
+  if(name === "play") clockResume(); else clockPause();
   window.scrollTo(0, 0);
 }
 
@@ -1918,6 +2390,7 @@ function showTab(name){
 function boot(saved){
   saved = saved || {};
   G.mode = saved.mode || "ai";
+  G.clockCfg = saved.clockCfg || "0";
   G.level = saved.level || 2;
   G.side = (saved.side === BLACK) ? BLACK : WHITE;
   G.hints = saved.hints !== false;
@@ -1937,6 +2410,7 @@ function boot(saved){
     G.last = [m.from, m.to];
   });
   G.flip = saved.flip !== undefined ? !!saved.flip : (G.mode === "ai" && G.side === BLACK);
+  clockInit();
 
   $("installCard").hidden = G.installHidden;
   $("rowLevel").style.display = G.mode === "ai" ? "" : "none";
@@ -1951,6 +2425,9 @@ function boot(saved){
   seg("segLevel", function(){ return G.level; }, function(v){ G.level = +v; drawGame(); save(); });
   seg("segSide", function(){ return G.side === WHITE ? "w" : "b"; }, function(v){
     G.side = v === "b" ? BLACK : WHITE; newGame();
+  });
+  seg("segClock", function(){ return G.clockCfg; }, function(v){
+    G.clockCfg = v; newGame();
   });
   seg("segHints", function(){ return G.hints ? "1" : "0"; }, function(v){
     G.hints = v === "1"; drawGame(); save();
@@ -1983,6 +2460,8 @@ function boot(saved){
   $("installClose").onclick = function(){
     G.installHidden = true; $("installCard").hidden = true; save();
   };
+  $("btnAnalyze").onclick = openAnalysis;
+  $("anaBack").onclick = closeAnalysis;
   $("puzPrev").onclick = function(){ loadPuzzle(P.i - 1); };
   $("puzNext").onclick = function(){ loadPuzzle(P.i + 1); };
   $("puzSolve").onclick = solvePuzzle;
@@ -1990,6 +2469,10 @@ function boot(saved){
     b.onclick = function(){ showTab(b.dataset.tab); };
   });
 
+  $("brandMark").innerHTML = iconHTML(2);
+  Array.prototype.forEach.call(document.querySelectorAll("[data-icon]"), function(el){
+    el.innerHTML = iconHTML(+el.dataset.icon);
+  });
   renderLessonList();
   drawGame();
   maybeAI();
@@ -1997,7 +2480,7 @@ function boot(saved){
   try{
     if(window.claude && window.claude.hot && window.claude.hot.snapshot){
       window.claude.hot.snapshot(function(){
-        return {moves:G.uci, mode:G.mode, level:G.level, side:G.side, flip:G.flip,
+        return {moves:G.uci, mode:G.mode, level:G.level, side:G.side, flip:G.flip, clockCfg:G.clockCfg,
                 hints:G.hints, sound:G.sound, installHidden:G.installHidden,
                 done:Object.keys(G.done), solved:Object.keys(G.solved)};
       });
