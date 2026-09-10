@@ -1967,9 +1967,15 @@ function boot(saved){
     var sq = sqFromEvent(e);
     if(sq >= 0) puzSquare(sq);
   });
+  var newArmed = false, newTimer = null, newLabel = $("btnNew").innerHTML;
+  function disarmNew(){
+    newArmed = false; clearTimeout(newTimer); $("btnNew").innerHTML = newLabel;
+  }
   $("btnNew").onclick = function(){
-    if(G.uci.length && !confirm("Começar uma partida nova?")) return;
-    newGame();
+    if(!G.uci.length || newArmed){ disarmNew(); newGame(); return; }
+    newArmed = true;
+    $("btnNew").innerHTML = '<span class="ic" aria-hidden="true">!</span>Confirmar?';
+    newTimer = setTimeout(disarmNew, 3000);
   };
   $("btnUndo").onclick = undo;
   $("btnHint").onclick = showHint;
