@@ -1,0 +1,2496 @@
+<meta charset="utf-8">
+<title>Xadrez de Bolso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap">
+<style>
+:root{
+  --ground:#EDEFEA; --surface:#FFFFFF; --surface-2:#F5F6F1; --surface-3:#E7EAE2;
+  --ink:#161A15; --ink-2:#4C544A; --ink-3:#79826F;
+  --line:#D6DAD0; --line-2:#C0C7B7;
+  --green:#3E5C46; --green-ink:#3E5C46; --green-soft:#DFE8DD;
+  --brass:#A87A2E; --brass-soft:#F2E7CC;
+  --danger:#A5312A; --danger-soft:#F6DEDB;
+  --sq-light:#E6E4D6; --sq-dark:#59795E;
+  --pc-white:#FBFAF3; --pc-black:#1B2018; --pc-stroke:#22281F; --pc-rim:rgba(246,247,240,.42);
+  --hl-last:rgba(168,122,46,.30); --hl-sel:rgba(168,122,46,.55);
+  --dot:rgba(22,26,21,.30); --dot-dark:rgba(251,250,243,.42);
+  --shadow:0 1px 2px rgba(22,26,21,.06), 0 6px 18px rgba(22,26,21,.07);
+  --radius:14px;
+  --f-display:"Newsreader",Georgia,"Times New Roman",serif;
+  --f-body:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#12150F; --surface:#1A1E17; --surface-2:#222720; --surface-3:#2B3129;
+    --ink:#E9ECE3; --ink-2:#AEB6A6; --ink-3:#7F8878;
+    --line:#2C3229; --line-2:#3A4136;
+    --green:#8FB295; --green-ink:#8FB295; --green-soft:#22301F;
+    --brass:#D9AD57; --brass-soft:#332913;
+    --danger:#E4776C; --danger-soft:#3A1E1A;
+    --sq-light:#BFBFAC; --sq-dark:#48624D;
+    --pc-white:#F6F4E9; --pc-black:#14180F; --pc-stroke:#0E120B; --pc-rim:rgba(233,236,227,.34);
+    --hl-last:rgba(217,173,87,.28); --hl-sel:rgba(217,173,87,.50);
+    --dot:rgba(20,24,15,.42); --dot-dark:rgba(246,244,233,.40);
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#12150F; --surface:#1A1E17; --surface-2:#222720; --surface-3:#2B3129;
+  --ink:#E9ECE3; --ink-2:#AEB6A6; --ink-3:#7F8878;
+  --line:#2C3229; --line-2:#3A4136;
+  --green:#8FB295; --green-ink:#8FB295; --green-soft:#22301F;
+  --brass:#D9AD57; --brass-soft:#332913;
+  --danger:#E4776C; --danger-soft:#3A1E1A;
+  --sq-light:#BFBFAC; --sq-dark:#48624D;
+  --pc-white:#F6F4E9; --pc-black:#14180F; --pc-stroke:#0E120B; --pc-rim:rgba(233,236,227,.34);
+  --hl-last:rgba(217,173,87,.28); --hl-sel:rgba(217,173,87,.50);
+  --dot:rgba(20,24,15,.42); --dot-dark:rgba(246,244,233,.40);
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--f-body);
+  -webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px;border-radius:6px}
+
+.app{max-width:560px;margin:0 auto;padding:0 16px;
+  padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+
+/* ---------- topo ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding-block:calc(12px + env(safe-area-inset-top,0px)) 10px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand .mark{width:26px;height:26px;color:var(--green-ink);flex:none}
+.brand h1{font-size:19px;line-height:1.1}
+.brand .sub{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.badge{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 11px;white-space:nowrap}
+
+/* ---------- cartões ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.eyebrow{font-family:var(--f-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ---------- faixas de jogador ---------- */
+.strip{display:flex;align-items:center;gap:8px;padding:7px 4px;min-height:38px}
+.strip .name{font-size:13px;font-weight:600;white-space:nowrap}
+.strip .side{width:11px;height:11px;border-radius:3px;border:1px solid var(--line-2);flex:none}
+.strip .side.w{background:var(--pc-white)}
+.strip .side.b{background:var(--pc-black)}
+.strip .taken{display:flex;align-items:center;min-width:0;overflow:hidden}
+.strip .taken .pc{width:16px;height:16px;flex:none;margin-right:-4px;filter:none;opacity:.75}
+.strip .adv{font-family:var(--f-mono);font-size:12px;color:var(--ink-2);margin-left:auto;flex:none;font-variant-numeric:tabular-nums}
+.strip .clock{font-family:var(--f-mono);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;
+  padding:4px 9px;border-radius:8px;background:var(--surface);border:1px solid var(--line);
+  color:var(--ink-3);flex:none;letter-spacing:.02em}
+.strip .clock[hidden]{display:none}
+.strip.turn .clock{background:var(--surface);border-color:var(--green);color:var(--ink)}
+.strip .clock.low{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+.strip .clock.out{opacity:.5;text-decoration:line-through}
+.strip.turn .name{color:var(--green-ink)}
+.strip.turn .name::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--green-ink);margin-left:6px;vertical-align:middle}
+
+/* ---------- tabuleiro ---------- */
+.board-wrap{position:relative}
+.board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);aspect-ratio:1/1;width:100%;
+  border-radius:6px;overflow:hidden;border:1px solid var(--line-2);
+  box-shadow:0 2px 4px rgba(22,26,21,.10),0 14px 30px rgba(22,26,21,.10);
+  touch-action:manipulation}
+@supports (container-type:inline-size){ .board{container-type:inline-size} }
+.sq{position:relative;display:flex;align-items:center;justify-content:center;
+  background:var(--sq-light);font-size:min(10.5vw,44px);line-height:1;user-select:none;-webkit-user-select:none}
+@supports (container-type:inline-size){ .sq{font-size:9.5cqw} }
+.sq.d{background:var(--sq-dark)}
+.sq .co{position:absolute;font-family:var(--f-mono);font-size:8px;font-weight:500;opacity:.5;pointer-events:none}
+@supports (container-type:inline-size){ .sq .co{font-size:1.7cqw} }
+.sq .co.f{right:3px;bottom:2px}
+.sq .co.r{left:3px;top:2px}
+.sq.l .co{color:var(--sq-dark)} .sq.d .co{color:var(--sq-light)}
+.pc{display:block;width:92%;height:92%;pointer-events:none;
+  filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.22))}
+.pc .sh{stroke-width:1.25;stroke-linejoin:round;stroke-linecap:round;paint-order:stroke fill}
+.pc .det{fill:none;stroke-width:1.2;stroke-linecap:round}
+.pc.w .sh{fill:var(--pc-white);stroke:var(--pc-stroke)}
+.pc.w .det{stroke:var(--pc-stroke)}
+.pc.b .sh{fill:var(--pc-black);stroke:var(--pc-rim)}
+.pc.b .det{stroke:var(--pc-rim)}
+.ico{width:1em;height:1em;display:block;fill:currentColor}
+.sq.last::before{content:"";position:absolute;inset:0;background:var(--hl-last)}
+.sq.sel::before{content:"";position:absolute;inset:0;background:var(--hl-sel)}
+.sq.check::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 50%,var(--danger) 0%,rgba(165,49,42,.55) 42%,transparent 72%);opacity:.85}
+.sq .hint{position:absolute;width:26%;height:26%;border-radius:50%;background:var(--dot);pointer-events:none}
+.sq.d .hint{background:var(--dot-dark)}
+.sq .hint.cap{width:88%;height:88%;border-radius:50%;background:none;
+  border:.09em solid var(--dot);box-sizing:border-box}
+.sq.d .hint.cap{border-color:var(--dot-dark)}
+.sq .mk{position:absolute;inset:6%;border:.11em dashed var(--brass);border-radius:4px;pointer-events:none}
+.board.flip{transform:rotate(180deg)} .board.flip .sq{transform:rotate(180deg)}
+
+/* promoção */
+.promo[hidden]{display:none}
+.promo{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(22,26,21,.55);backdrop-filter:blur(2px);border-radius:6px;z-index:5}
+.promo .sheet{background:var(--surface);border-radius:12px;padding:14px;text-align:center;box-shadow:var(--shadow)}
+.promo .opts{display:flex;gap:6px;margin-top:10px}
+.promo button{font-size:34px;line-height:1;width:52px;height:52px;border-radius:10px;background:var(--surface-2);
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.promo button .pc{width:38px;height:38px;filter:none}
+
+/* ---------- controles ---------- */
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:12px;
+  background:var(--surface);border:1px solid var(--line);font-size:11px;font-weight:500;color:var(--ink-2);
+  box-shadow:var(--shadow);transition:transform .08s ease,background .15s ease}
+.btn .ic{font-size:17px;line-height:1;color:var(--green-ink)}
+.btn:active{transform:scale(.96);background:var(--surface-2)}
+.btn[disabled]{opacity:.4}
+.btn-wide{display:block;width:100%;padding:13px;border-radius:12px;background:var(--green);color:#F4F7F1;
+  font-weight:600;font-size:14px;text-align:center;border:1px solid transparent}
+:root[data-theme="dark"] .btn-wide,:root:not([data-theme="light"]) .btn-wide{color:#12150F}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .btn-wide{color:#F4F7F1}}
+.btn-wide:active{filter:brightness(.94)}
+.btn-ghost{display:block;width:100%;padding:12px;border-radius:12px;background:var(--surface);
+  border:1px solid var(--line);font-weight:500;font-size:13px;text-align:center;color:var(--ink-2)}
+
+/* ---------- status / resultado ---------- */
+.status{display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:12px;margin-bottom:10px;
+  background:var(--surface);border:1px solid var(--line);font-size:13.5px;font-weight:500;min-height:44px}
+.status .ic{font-size:17px;line-height:1;display:flex;flex:none}
+.status.alert{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+.status.good{background:var(--green-soft);border-color:var(--green);color:var(--green-ink)}
+.status .thinking{display:inline-flex;gap:3px;margin-left:auto}
+.status .thinking i{width:5px;height:5px;border-radius:50%;background:var(--ink-3);animation:pulse 1.1s infinite}
+.status .thinking i:nth-child(2){animation-delay:.15s}
+.status .thinking i:nth-child(3){animation-delay:.3s}
+@keyframes pulse{0%,60%,100%{opacity:.25}30%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.status .thinking i{animation:none;opacity:.6}.btn:active{transform:none}}
+
+/* ---------- ajustes ---------- */
+.settings{margin-top:12px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line);
+  box-shadow:var(--shadow);overflow:hidden}
+.settings>summary{padding:13px 15px;font-size:13px;font-weight:600;cursor:pointer;list-style:none;
+  display:flex;align-items:center;justify-content:space-between}
+.settings>summary::-webkit-details-marker{display:none}
+.settings>summary::after{content:"›";font-size:19px;color:var(--ink-3);transform:rotate(90deg)}
+.settings[open]>summary::after{transform:rotate(-90deg)}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 15px;border-top:1px solid var(--line)}
+.setrow>span{font-size:13px;color:var(--ink-2)}
+.seg{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:2px;gap:2px}
+.seg button{font-size:12px;font-weight:500;padding:6px 10px;border-radius:7px;color:var(--ink-2);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12);font-weight:600}
+
+/* ---------- planilha ---------- */
+.sheet-head{display:flex;align-items:baseline;justify-content:space-between;margin:20px 0 8px}
+.sheet-head h2{font-size:16px}
+.moves{font-family:var(--f-mono);font-size:12.5px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:10px 12px;max-height:184px;overflow-y:auto;box-shadow:var(--shadow)}
+.moves .row{display:grid;grid-template-columns:26px 1fr 1fr;gap:6px;padding:3px 0;border-bottom:1px solid var(--surface-2)}
+.moves .row:last-child{border-bottom:0}
+.moves .n{color:var(--ink-3);font-variant-numeric:tabular-nums}
+.moves .mv{font-weight:500}
+.moves .mv.on{color:var(--brass);font-weight:600}
+.moves .empty{color:var(--ink-3);font-size:12px}
+
+/* ---------- instalar ---------- */
+.install{display:flex;gap:11px;padding:13px;border-radius:var(--radius);background:var(--brass-soft);
+  border:1px solid var(--brass);margin-bottom:12px;align-items:flex-start}
+.install .ic{font-size:17px;line-height:1.2}
+.install p{font-size:12.5px;line-height:1.5;color:var(--ink-2)}
+.install strong{color:var(--ink)}
+.install .x{margin-left:auto;font-size:16px;color:var(--ink-3);padding:0 4px;align-self:center}
+
+/* ---------- aprender ---------- */
+.lesson-list{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+.lesson-item{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;background:var(--surface);
+  border:1px solid var(--line);text-align:left;width:100%;box-shadow:var(--shadow)}
+.lesson-item:active{background:var(--surface-2)}
+.lesson-item .num{font-family:var(--f-mono);font-size:11px;font-weight:600;color:var(--green-ink);
+  width:26px;height:26px;border-radius:50%;background:var(--green-soft);display:flex;align-items:center;justify-content:center;flex:none}
+.lesson-item .tt{font-size:14px;font-weight:600;line-height:1.25}
+.lesson-item .dd{font-size:11.5px;color:var(--ink-3);margin-top:2px;line-height:1.35}
+.lesson-item .chk{margin-left:auto;color:var(--green-ink);font-size:15px;flex:none}
+.section-title{margin:22px 0 10px}
+.section-title h2{font-size:17px}
+.section-title p{font-size:12.5px;color:var(--ink-3);margin-top:3px;line-height:1.45}
+
+.lesson{padding-bottom:8px}
+.lesson-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.back{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:500;color:var(--green-ink);
+  padding:7px 11px;border-radius:9px;background:var(--surface);border:1px solid var(--line)}
+.lesson h2{font-size:22px;line-height:1.2;margin-bottom:6px}
+.lesson .kicker{font-family:var(--f-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--brass);margin-bottom:7px}
+.lesson .blocks{display:flex;flex-direction:column;gap:15px}
+.lesson p.tx{font-size:14.5px;line-height:1.62;color:var(--ink-2);max-width:62ch}
+.lesson p.tx strong{color:var(--ink);font-weight:600}
+.lesson h3{font-size:15px;margin-top:4px}
+.lesson ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px}
+.lesson li{font-size:14px;line-height:1.55;color:var(--ink-2)}
+.lesson li strong{color:var(--ink)}
+.note{border-left:3px solid var(--brass);padding:2px 0 2px 13px;font-size:13.5px;line-height:1.55;color:var(--ink-2)}
+.note b{color:var(--ink)}
+.mini{max-width:330px;margin:0 auto;width:100%}
+.mini-cap{font-size:12px;color:var(--ink-3);text-align:center;margin-top:8px;line-height:1.45;max-width:46ch;margin-inline:auto}
+.demo-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px}
+.demo-bar button{width:40px;height:34px;border-radius:9px;background:var(--surface);border:1px solid var(--line);
+  font-size:15px;color:var(--ink-2);display:flex;align-items:center;justify-content:center}
+.demo-bar .lbl{font-family:var(--f-mono);font-size:12px;color:var(--ink-2);min-width:112px;text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl td{padding:8px 6px;border-bottom:1px solid var(--line);color:var(--ink-2)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td:first-child{width:34px}
+.tbl td:first-child .pc{width:22px;height:22px;filter:none}
+.tbl td:last-child{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--ink)}
+
+/* ---------- táticas ---------- */
+.prog{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.prog .bar{flex:1;height:6px;border-radius:3px;background:var(--surface-3);overflow:hidden}
+.prog .fill{height:100%;background:var(--green);border-radius:3px;transition:width .35s ease}
+.prog .lbl{font-family:var(--f-mono);font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.puz-head{margin-bottom:10px}
+.puz-head .eyebrow{margin-bottom:5px}
+.puz-head h2{font-size:17px;line-height:1.25}
+.puz-feed{margin-top:10px;padding:11px 13px;border-radius:12px;font-size:13.5px;font-weight:500;
+  background:var(--surface);border:1px solid var(--line);min-height:44px;display:flex;align-items:center;gap:8px}
+.puz-feed.ok{background:var(--green-soft);border-color:var(--green);color:var(--green-ink)}
+.puz-feed.no{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+.puz-nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+
+/* ---------- análise ---------- */
+.viz{ --pos:#2a78d6; --neg:#eb6834;
+  --st-good:#0ca30c; --st-warn:#fab219; --st-serious:#ec835a; --st-critical:#d03b3b; }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .viz{ --pos:#3987e5; --neg:#d95926; } }
+:root[data-theme="dark"] .viz{ --pos:#3987e5; --neg:#d95926; }
+.chart{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px 10px 8px;box-shadow:var(--shadow)}
+.chart figcaption{font-size:13px;font-weight:600;margin:0 4px 8px;color:var(--ink)}
+.chart svg{width:100%;height:auto;display:block;touch-action:pan-y}
+.chart .axis{fill:var(--ink-3);font-family:var(--f-mono);font-size:7px}
+.chart .zero{stroke:var(--line-2);stroke-width:.8}
+.chart .line{fill:none;stroke:var(--ink-2);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.chart .fpos{fill:var(--pos);opacity:.20} .chart .fneg{fill:var(--neg);opacity:.20}
+.chart .cross{stroke:var(--ink-3);stroke-width:.8;stroke-dasharray:2 2}
+.chart .cur{fill:var(--ink);stroke:var(--surface);stroke-width:1.4}
+.chart .dot{stroke:var(--surface);stroke-width:1.4}
+.chart-note{font-size:11.5px;color:var(--ink-3);margin:8px 4px 0;text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);font-size:12.5px;color:var(--ink-2)}
+.chip b{color:var(--ink);font-variant-numeric:tabular-nums}
+.chip i{width:8px;height:8px;border-radius:50%;flex:none}
+.moments{display:flex;flex-direction:column;gap:7px}
+.moment{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;
+  border-radius:11px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.moment[aria-current="true"]{border-color:var(--brass)}
+.moment i{width:8px;height:8px;border-radius:50%;flex:none}
+.moment .mv{font-family:var(--f-mono);font-size:12.5px;font-weight:600;color:var(--ink)}
+.moment .why{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.moment .cost{margin-left:auto;font-family:var(--f-mono);font-size:12px;color:var(--danger);flex:none}
+.ana-bar{height:6px;border-radius:3px;background:var(--surface-3);overflow:hidden;margin-top:10px}
+.ana-bar .fill{height:100%;background:var(--green);transition:width .2s linear}
+.analyze-row{margin-top:10px}
+.link-btn{display:block;width:100%;padding:11px;border-radius:11px;background:var(--surface);
+  border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--green-ink);box-shadow:var(--shadow)}
+.link-btn[hidden]{display:none}
+
+/* ---------- tabs ---------- */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;
+  background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar .inner{display:grid;grid-template-columns:repeat(3,1fr);width:100%;max-width:560px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 8px;
+  font-size:10.5px;font-weight:500;color:var(--ink-3)}
+.tab .ic{font-size:19px;line-height:1;display:flex}
+.tab[aria-selected="true"]{color:var(--green-ink);font-weight:600}
+.view[hidden]{display:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark" id="brandMark" aria-hidden="true"></span>
+      <div>
+        <h1>Xadrez de Bolso</h1>
+        <p class="sub">aprender &amp; jogar</p>
+      </div>
+    </div>
+    <span class="badge" id="topBadge">Nível 2 · Casual</span>
+  </header>
+
+  <main>
+    <!-- ============ JOGAR ============ -->
+    <section class="view" id="view-play">
+      <div class="install" id="installCard" hidden>
+        <span class="ic" aria-hidden="true">&#9881;&#xFE0E;</span>
+        <p>No iPhone: <strong>Compartilhar</strong> → <strong>Adicionar à Tela de Início</strong>.
+          Vira um app em tela cheia, sem passar pela App Store.</p>
+        <button class="x" id="installClose" aria-label="Dispensar aviso">&times;</button>
+      </div>
+
+      <div class="status" id="status" role="status" aria-live="polite">
+        <span class="ic" aria-hidden="true">&#9812;&#xFE0E;</span>
+        <span id="statusText">Brancas jogam</span>
+      </div>
+
+      <div class="strip" id="stripTop">
+        <span class="side b" aria-hidden="true"></span>
+        <span class="name" id="nameTop">Computador</span>
+        <span class="taken" id="takenTop"></span>
+        <span class="adv" id="advTop"></span>
+        <span class="clock" id="clockTop" hidden>--:--</span>
+      </div>
+
+      <div class="board-wrap">
+        <div class="board" id="board" role="grid" aria-label="Tabuleiro de xadrez"></div>
+        <div class="promo" id="promo" hidden>
+          <div class="sheet">
+            <p style="font-size:13px;font-weight:600">Promover o peão para</p>
+            <div class="opts" id="promoOpts"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="strip" id="stripBottom">
+        <span class="side w" aria-hidden="true"></span>
+        <span class="name" id="nameBottom">Você</span>
+        <span class="taken" id="takenBottom"></span>
+        <span class="adv" id="advBottom"></span>
+        <span class="clock" id="clockBottom" hidden>--:--</span>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="btnNew"><span class="ic" aria-hidden="true">&#9873;&#xFE0E;</span>Novo jogo</button>
+        <button class="btn" id="btnUndo"><span class="ic" aria-hidden="true">&#8630;</span>Voltar</button>
+        <button class="btn" id="btnHint"><span class="ic" aria-hidden="true">&#9758;&#xFE0E;</span>Dica</button>
+        <button class="btn" id="btnFlip"><span class="ic" aria-hidden="true">&#8645;</span>Girar</button>
+      </div>
+
+      <div class="analyze-row">
+        <button class="link-btn" id="btnAnalyze" hidden>Analisar partida →</button>
+      </div>
+
+      <details class="settings" id="settings">
+        <summary>Ajustes da partida</summary>
+        <div class="setrow">
+          <span>Adversário</span>
+          <div class="seg" id="segMode">
+            <button data-v="ai" aria-pressed="true">Computador</button>
+            <button data-v="human" aria-pressed="false">2 jogadores</button>
+          </div>
+        </div>
+        <div class="setrow" id="rowLevel">
+          <span>Nível</span>
+          <div class="seg" id="segLevel">
+            <button data-v="1" aria-pressed="false">1</button>
+            <button data-v="2" aria-pressed="true">2</button>
+            <button data-v="3" aria-pressed="false">3</button>
+            <button data-v="4" aria-pressed="false">4</button>
+          </div>
+        </div>
+        <div class="setrow" id="rowSide">
+          <span>Você joga de</span>
+          <div class="seg" id="segSide">
+            <button data-v="w" aria-pressed="true">Brancas</button>
+            <button data-v="b" aria-pressed="false">Pretas</button>
+          </div>
+        </div>
+        <div class="setrow">
+          <span>Relógio</span>
+          <div class="seg" id="segClock">
+            <button data-v="0" aria-pressed="true">Sem</button>
+            <button data-v="180+2" aria-pressed="false">3+2</button>
+            <button data-v="600+5" aria-pressed="false">10+5</button>
+            <button data-v="1500+10" aria-pressed="false">25+10</button>
+          </div>
+        </div>
+        <div class="setrow">
+          <span>Mostrar lances possíveis</span>
+          <div class="seg" id="segHints">
+            <button data-v="1" aria-pressed="true">Sim</button>
+            <button data-v="0" aria-pressed="false">Não</button>
+          </div>
+        </div>
+        <div class="setrow">
+          <span>Som</span>
+          <div class="seg" id="segSound">
+            <button data-v="1" aria-pressed="true">Ligado</button>
+            <button data-v="0" aria-pressed="false">Mudo</button>
+          </div>
+        </div>
+      </details>
+
+      <div class="sheet-head">
+        <h2>Planilha</h2>
+        <span class="eyebrow" id="sheetInfo">notação em português</span>
+      </div>
+      <div class="moves" id="moves"><span class="empty">Os lances aparecem aqui conforme a partida anda.</span></div>
+    </section>
+
+    <!-- ============ ANÁLISE ============ -->
+    <section class="view viz" id="view-analysis" hidden>
+      <div class="lesson-top">
+        <button class="back" id="anaBack">‹ Partida</button>
+      </div>
+      <div class="lesson">
+        <p class="kicker">Análise da partida</p>
+        <h2 id="anaResult">Partida</h2>
+        <p class="tx" id="anaSub" style="margin-top:6px"></p>
+        <div id="anaProgress">
+          <p class="chart-note" id="anaProgressText" style="text-align:left;margin-left:0">Conferindo lance a lance…</p>
+          <div class="ana-bar"><div class="fill" id="anaFill" style="width:0%"></div></div>
+        </div>
+        <div class="blocks" id="anaBody" hidden>
+          <figure class="chart">
+            <figcaption>Avaliação lance a lance</figcaption>
+            <div id="anaChart"></div>
+            <p class="chart-note">Toque no gráfico e arraste para percorrer a partida.</p>
+          </figure>
+          <div>
+            <div class="board mini" id="anaBoard"></div>
+            <p class="mini-cap" id="anaMoveCap"></p>
+          </div>
+          <div>
+            <h3 style="margin-bottom:9px" id="anaChipsTitle">Como você jogou</h3>
+            <div class="chips" id="anaChips"></div>
+          </div>
+          <div>
+            <h3 style="margin-bottom:9px">Momentos decisivos</h3>
+            <div class="moments" id="anaMoments"></div>
+          </div>
+          <p class="note" id="anaDisclaimer"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ APRENDER ============ -->
+    <section class="view" id="view-learn" hidden>
+      <div id="learnIndex">
+        <div class="section-title">
+          <h2>Do zero ao primeiro xeque-mate</h2>
+          <p>Dez lições curtas, na ordem. Cada uma tem tabuleiro para você tocar e experimentar.</p>
+        </div>
+        <div class="lesson-list" id="lessonList"></div>
+      </div>
+      <div id="learnDetail" hidden></div>
+    </section>
+
+    <!-- ============ TÁTICAS ============ -->
+    <section class="view" id="view-puzzles" hidden>
+      <div class="section-title">
+        <h2>Exercícios de tática</h2>
+        <p>Posições reais para treinar o olho. Encontre o lance e jogue no tabuleiro.</p>
+      </div>
+      <div class="prog">
+        <div class="bar"><div class="fill" id="progFill" style="width:0%"></div></div>
+        <span class="lbl" id="progLbl">0/12</span>
+      </div>
+      <div class="puz-head">
+        <p class="eyebrow" id="puzKicker">Exercício 1 de 12</p>
+        <h2 id="puzTitle">Carregando…</h2>
+      </div>
+      <div class="strip">
+        <span class="side w" id="puzSide" aria-hidden="true"></span>
+        <span class="name" id="puzTurn">Brancas jogam</span>
+      </div>
+      <div class="board-wrap">
+        <div class="board" id="puzBoard" role="grid" aria-label="Tabuleiro do exercício"></div>
+        <div class="promo" id="puzPromo" hidden>
+          <div class="sheet">
+            <p style="font-size:13px;font-weight:600">Promover o peão para</p>
+            <div class="opts" id="puzPromoOpts"></div>
+          </div>
+        </div>
+      </div>
+      <div class="puz-feed" id="puzFeed"><span>Sua vez: ache o melhor lance.</span></div>
+      <div class="puz-nav">
+        <button class="btn-ghost" id="puzPrev">&larr; Anterior</button>
+        <button class="btn-ghost" id="puzSolve">Ver solução</button>
+        <button class="btn-ghost" id="puzNext">Próximo &rarr;</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="tabbar">
+  <div class="inner" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-tab="play">
+      <span class="ic" data-icon="5" aria-hidden="true"></span>Jogar</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="learn">
+      <span class="ic" data-icon="2" aria-hidden="true"></span>Aprender</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="puzzles">
+      <span class="ic" data-icon="3" aria-hidden="true"></span>Táticas</button>
+  </div>
+</nav>
+
+<script>
+/*ENGINE-START*/
+/* ---------------------------------------------------------------
+   Motor de xadrez — tabuleiro 0x88, geração de lances completa
+   (roque, en passant, promoção, xeque, mate, afogamento, empates)
+   Índice 0 = a8 ... 119 = h1.  sq = fileira*16 + coluna
+----------------------------------------------------------------*/
+var WHITE=0, BLACK=1;
+var PAWN=1, KNIGHT=2, BISHOP=3, ROOK=4, QUEEN=5, KING=6;
+var CW=8, CB=16;
+
+function mk(t,c){ return t | (c===WHITE?CW:CB); }
+function pType(p){ return p & 7; }
+function pColor(p){ return (p & CW) ? WHITE : BLACK; }
+function fileOf(sq){ return sq & 15; }
+function rankOf(sq){ return 8 - (sq >> 4); }
+function sqName(sq){ return "abcdefgh"[fileOf(sq)] + rankOf(sq); }
+function nameSq(s){
+  var f = "abcdefgh".indexOf(s[0]), r = parseInt(s[1],10);
+  if(f<0 || !(r>=1 && r<=8)) return -1;
+  return (8-r)*16 + f;
+}
+var OFF_N=[-33,-31,-18,-14,14,18,31,33];
+var OFF_K=[-17,-16,-15,-1,1,15,16,17];
+var OFF_DIAG=[-17,-15,15,17];
+var OFF_LINE=[-16,-1,1,16];
+
+var F_NORMAL=0, F_CAPTURE=1, F_EP=2, F_BIG=4, F_KSIDE=8, F_QSIDE=16, F_PROMO=32;
+var C_WK=1, C_WQ=2, C_BK=4, C_BQ=8;
+var ROOK_HOME = {119:C_WK, 112:C_WQ, 7:C_BK, 0:C_BQ};
+
+function emptyState(){
+  return { b:new Array(128).fill(0), turn:WHITE, cast:0, ep:-1, half:0, full:1,
+           kings:[-1,-1], hist:[], reps:Object.create(null) };
+}
+var START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+function fenToState(fen){
+  var st = emptyState(), parts = fen.trim().split(/\s+/);
+  var rows = parts[0].split("/");
+  if(rows.length !== 8) throw new Error("FEN inválido: " + fen);
+  for(var r=0; r<8; r++){
+    var f=0, row=rows[r];
+    for(var i=0;i<row.length;i++){
+      var ch = row[i];
+      if(/[1-8]/.test(ch)){ f += parseInt(ch,10); continue; }
+      var c = ch === ch.toUpperCase() ? WHITE : BLACK;
+      var t = {p:PAWN,n:KNIGHT,b:BISHOP,r:ROOK,q:QUEEN,k:KING}[ch.toLowerCase()];
+      if(!t) throw new Error("Peça inválida no FEN: " + ch);
+      var sq = r*16 + f;
+      st.b[sq] = mk(t,c);
+      if(t === KING) st.kings[c] = sq;
+      f++;
+    }
+  }
+  st.turn = (parts[1] === "b") ? BLACK : WHITE;
+  var cs = parts[2] || "-";
+  if(cs.indexOf("K")>=0) st.cast |= C_WK;
+  if(cs.indexOf("Q")>=0) st.cast |= C_WQ;
+  if(cs.indexOf("k")>=0) st.cast |= C_BK;
+  if(cs.indexOf("q")>=0) st.cast |= C_BQ;
+  st.ep = (parts[3] && parts[3] !== "-") ? nameSq(parts[3]) : -1;
+  st.half = parts[4] ? parseInt(parts[4],10) : 0;
+  st.full = parts[5] ? parseInt(parts[5],10) : 1;
+  st.reps[posKey(st)] = 1;
+  return st;
+}
+
+function stateToFen(st){
+  var out = "";
+  for(var r=0;r<8;r++){
+    var run = 0;
+    for(var f=0;f<8;f++){
+      var p = st.b[r*16+f];
+      if(!p){ run++; continue; }
+      if(run){ out += run; run = 0; }
+      var ch = " pnbrqk"[pType(p)];
+      out += pColor(p) === WHITE ? ch.toUpperCase() : ch;
+    }
+    if(run) out += run;
+    if(r < 7) out += "/";
+  }
+  var cs = (st.cast & C_WK ? "K":"") + (st.cast & C_WQ ? "Q":"") +
+           (st.cast & C_BK ? "k":"") + (st.cast & C_BQ ? "q":"");
+  return out + " " + (st.turn===WHITE?"w":"b") + " " + (cs||"-") + " " +
+         (st.ep>=0 ? sqName(st.ep) : "-") + " " + st.half + " " + st.full;
+}
+function posKey(st){
+  var f = stateToFen(st).split(" ");
+  return f[0]+" "+f[1]+" "+f[2]+" "+f[3];
+}
+
+function attacked(st, sq, by){
+  var b = st.b, t, i, d, s;
+  if(by === WHITE){
+    if(!((sq+15) & 0x88) && b[sq+15] === mk(PAWN,WHITE)) return true;
+    if(!((sq+17) & 0x88) && b[sq+17] === mk(PAWN,WHITE)) return true;
+  } else {
+    if(!((sq-15) & 0x88) && b[sq-15] === mk(PAWN,BLACK)) return true;
+    if(!((sq-17) & 0x88) && b[sq-17] === mk(PAWN,BLACK)) return true;
+  }
+  for(i=0;i<8;i++){
+    t = sq + OFF_N[i];
+    if(!(t & 0x88) && b[t] === mk(KNIGHT,by)) return true;
+  }
+  for(i=0;i<8;i++){
+    t = sq + OFF_K[i];
+    if(!(t & 0x88) && b[t] === mk(KING,by)) return true;
+  }
+  for(i=0;i<4;i++){
+    d = OFF_DIAG[i]; s = sq + d;
+    while(!(s & 0x88)){
+      if(b[s]){
+        if(pColor(b[s]) === by && (pType(b[s]) === BISHOP || pType(b[s]) === QUEEN)) return true;
+        break;
+      }
+      s += d;
+    }
+  }
+  for(i=0;i<4;i++){
+    d = OFF_LINE[i]; s = sq + d;
+    while(!(s & 0x88)){
+      if(b[s]){
+        if(pColor(b[s]) === by && (pType(b[s]) === ROOK || pType(b[s]) === QUEEN)) return true;
+        break;
+      }
+      s += d;
+    }
+  }
+  return false;
+}
+function inCheck(st, color){
+  var k = st.kings[color];
+  return k >= 0 ? attacked(st, k, 1-color) : false;
+}
+
+function addPawnMove(list, st, from, to, flags){
+  if(rankOf(to) === 8 || rankOf(to) === 1){
+    [QUEEN,ROOK,BISHOP,KNIGHT].forEach(function(pr){
+      list.push({from:from,to:to,piece:st.b[from],captured:st.b[to],promo:pr,flags:flags|F_PROMO});
+    });
+  } else {
+    list.push({from:from,to:to,piece:st.b[from],captured:st.b[to],promo:0,flags:flags});
+  }
+}
+
+/* lances pseudo-legais (podem deixar o próprio rei em xeque) */
+function genPseudo(st, capturesOnly){
+  var list = [], b = st.b, us = st.turn, them = 1-us;
+  var dir = us === WHITE ? -16 : 16;
+  var startRank = us === WHITE ? 2 : 7;
+  for(var sq=0; sq<128; sq++){
+    if(sq & 0x88){ sq += 7; continue; }
+    var p = b[sq];
+    if(!p || pColor(p) !== us) continue;
+    var t = pType(p), i, to, d, s;
+    if(t === PAWN){
+      to = sq + dir;
+      if(!(to & 0x88) && !b[to]){
+        if(!capturesOnly) addPawnMove(list, st, sq, to, F_NORMAL);
+        var to2 = sq + 2*dir;
+        if(rankOf(sq) === startRank && !b[to2] && !capturesOnly)
+          list.push({from:sq,to:to2,piece:p,captured:0,promo:0,flags:F_BIG});
+      }
+      for(i=0;i<2;i++){
+        to = sq + dir + (i ? 1 : -1);
+        if(to & 0x88) continue;
+        if(b[to] && pColor(b[to]) === them) addPawnMove(list, st, sq, to, F_CAPTURE);
+        else if(to === st.ep) list.push({from:sq,to:to,piece:p,captured:mk(PAWN,them),promo:0,flags:F_EP|F_CAPTURE});
+      }
+      continue;
+    }
+    if(t === KNIGHT || t === KING){
+      var offs = t === KNIGHT ? OFF_N : OFF_K;
+      for(i=0;i<8;i++){
+        to = sq + offs[i];
+        if(to & 0x88) continue;
+        if(b[to]){
+          if(pColor(b[to]) === them) list.push({from:sq,to:to,piece:p,captured:b[to],promo:0,flags:F_CAPTURE});
+        } else if(!capturesOnly){
+          list.push({from:sq,to:to,piece:p,captured:0,promo:0,flags:F_NORMAL});
+        }
+      }
+      continue;
+    }
+    var dirs = t === BISHOP ? OFF_DIAG : t === ROOK ? OFF_LINE : OFF_K;
+    for(i=0;i<dirs.length;i++){
+      d = dirs[i]; s = sq + d;
+      while(!(s & 0x88)){
+        if(b[s]){
+          if(pColor(b[s]) === them) list.push({from:sq,to:s,piece:p,captured:b[s],promo:0,flags:F_CAPTURE});
+          break;
+        }
+        if(!capturesOnly) list.push({from:sq,to:s,piece:p,captured:0,promo:0,flags:F_NORMAL});
+        s += d;
+      }
+    }
+  }
+  /* roque */
+  if(!capturesOnly){
+    var k = st.kings[us];
+    if(k >= 0 && !attacked(st, k, them)){
+      var kBit = us === WHITE ? C_WK : C_BK, qBit = us === WHITE ? C_WQ : C_BQ;
+      if(st.cast & kBit && !b[k+1] && !b[k+2] &&
+         !attacked(st,k+1,them) && !attacked(st,k+2,them) && b[k+3]===mk(ROOK,us))
+        list.push({from:k,to:k+2,piece:b[k],captured:0,promo:0,flags:F_KSIDE});
+      if(st.cast & qBit && !b[k-1] && !b[k-2] && !b[k-3] &&
+         !attacked(st,k-1,them) && !attacked(st,k-2,them) && b[k-4]===mk(ROOK,us))
+        list.push({from:k,to:k-2,piece:b[k],captured:0,promo:0,flags:F_QSIDE});
+    }
+  }
+  return list;
+}
+
+function legalMoves(st, capturesOnly){
+  var pseudo = genPseudo(st, capturesOnly), out = [], us = st.turn;
+  for(var i=0;i<pseudo.length;i++){
+    makeMove(st, pseudo[i], true);
+    if(!inCheck(st, us)) out.push(pseudo[i]);
+    unmakeMove(st);
+  }
+  return out;
+}
+
+function makeMove(st, m, fast){
+  var b = st.b, us = st.turn, them = 1-us;
+  st.hist.push({m:m, cast:st.cast, ep:st.ep, half:st.half, full:st.full,
+                kw:st.kings[0], kb:st.kings[1], fast:!!fast});
+  b[m.to] = m.promo ? mk(m.promo, us) : b[m.from];
+  b[m.from] = 0;
+  if(m.flags & F_EP) b[m.to + (us === WHITE ? 16 : -16)] = 0;
+  if(m.flags & F_KSIDE){ b[m.to-1] = b[m.to+1]; b[m.to+1] = 0; }
+  if(m.flags & F_QSIDE){ b[m.to+1] = b[m.to-2]; b[m.to-2] = 0; }
+  if(pType(m.piece) === KING){
+    st.kings[us] = m.to;
+    st.cast &= us === WHITE ? ~(C_WK|C_WQ) : ~(C_BK|C_BQ);
+  }
+  if(ROOK_HOME[m.from]) st.cast &= ~ROOK_HOME[m.from];
+  if(ROOK_HOME[m.to])   st.cast &= ~ROOK_HOME[m.to];
+  st.ep = (m.flags & F_BIG) ? (m.from + (us === WHITE ? -16 : 16)) : -1;
+  st.half = (pType(m.piece) === PAWN || (m.flags & F_CAPTURE)) ? 0 : st.half + 1;
+  if(us === BLACK) st.full++;
+  st.turn = them;
+  if(!fast){ var k = posKey(st); st.reps[k] = (st.reps[k] || 0) + 1; }
+  return st;
+}
+
+function unmakeMove(st){
+  var h = st.hist.pop();
+  if(!h) return;
+  if(!h.fast){
+    var k = posKey(st);
+    st.reps[k] = (st.reps[k] || 1) - 1;
+    if(st.reps[k] <= 0) delete st.reps[k];
+  }
+  var b = st.b, m = h.m, us = pColor(m.piece);
+  b[m.from] = m.piece;
+  b[m.to] = 0;
+  if(m.flags & F_EP) b[m.to + (us === WHITE ? 16 : -16)] = mk(PAWN, 1-us);
+  else if(m.flags & F_CAPTURE) b[m.to] = m.captured;
+  if(m.flags & F_KSIDE){ b[m.to+1] = b[m.to-1]; b[m.to-1] = 0; }
+  if(m.flags & F_QSIDE){ b[m.to-2] = b[m.to+1]; b[m.to+1] = 0; }
+  st.cast = h.cast; st.ep = h.ep; st.half = h.half; st.full = h.full;
+  st.kings[0] = h.kw; st.kings[1] = h.kb;
+  st.turn = us;
+}
+
+/* --------- notação em português: R D T B C --------- */
+var PT_LETTER = {2:"C", 3:"B", 4:"T", 5:"D", 6:"R"};
+function moveToSan(st, m){
+  var legal = legalMoves(st), san;
+  if(m.flags & F_KSIDE) san = "O-O";
+  else if(m.flags & F_QSIDE) san = "O-O-O";
+  else {
+    var t = pType(m.piece), from = sqName(m.from), to = sqName(m.to);
+    if(t === PAWN){
+      san = (m.flags & F_CAPTURE) ? from[0] + "x" + to : to;
+      if(m.promo) san += "=" + PT_LETTER[m.promo];
+    } else {
+      var amb = legal.filter(function(o){
+        return o.to === m.to && o.from !== m.from && pType(o.piece) === t;
+      });
+      var dis = "";
+      if(amb.length){
+        var sameFile = amb.some(function(o){ return fileOf(o.from) === fileOf(m.from); });
+        var sameRank = amb.some(function(o){ return rankOf(o.from) === rankOf(m.from); });
+        dis = !sameFile ? from[0] : !sameRank ? from[1] : from;
+      }
+      san = PT_LETTER[t] + dis + ((m.flags & F_CAPTURE) ? "x" : "") + to;
+    }
+  }
+  makeMove(st, m, true);
+  var opp = legalMoves(st);
+  if(inCheck(st, st.turn)) san += opp.length ? "+" : "#";
+  else if(!opp.length) san += " (afogado)";
+  unmakeMove(st);
+  return san;
+}
+function moveToUci(m){
+  return sqName(m.from) + sqName(m.to) + (m.promo ? " nbrqk"[m.promo] : "");
+}
+function findMoveByUci(st, uci){
+  var moves = legalMoves(st);
+  for(var i=0;i<moves.length;i++) if(moveToUci(moves[i]) === uci) return moves[i];
+  return null;
+}
+
+/* --------- fim de partida --------- */
+function insufficientMaterial(st){
+  var pieces = [], b = st.b;
+  for(var sq=0; sq<128; sq++){
+    if(sq & 0x88){ sq += 7; continue; }
+    if(b[sq] && pType(b[sq]) !== KING) pieces.push({t:pType(b[sq]), c:pColor(b[sq]), sq:sq});
+  }
+  if(pieces.length === 0) return true;
+  if(pieces.length === 1 && (pieces[0].t === BISHOP || pieces[0].t === KNIGHT)) return true;
+  if(pieces.length === 2 && pieces[0].t === BISHOP && pieces[1].t === BISHOP){
+    var dark = function(sq){ return ((sq >> 4) + (sq & 15)) % 2; };
+    if(pieces[0].c !== pieces[1].c && dark(pieces[0].sq) === dark(pieces[1].sq)) return true;
+  }
+  return false;
+}
+function gameStatus(st){
+  var moves = legalMoves(st);
+  if(!moves.length){
+    if(inCheck(st, st.turn)) return {over:true, kind:"mate", winner:1-st.turn};
+    return {over:true, kind:"afogamento"};
+  }
+  if(insufficientMaterial(st)) return {over:true, kind:"material"};
+  if(st.half >= 100) return {over:true, kind:"50"};
+  if(st.reps[posKey(st)] >= 3) return {over:true, kind:"repeticao"};
+  return {over:false, check:inCheck(st, st.turn), moves:moves};
+}
+/*ENGINE-END*/
+</script>
+
+<script>
+/*AI-START*/
+/* ---------------------------------------------------------------
+   Adversário: negamax com poda alfa-beta, ordenação MVV-LVA,
+   busca de quiescência e tabelas de casas. Quatro níveis.
+----------------------------------------------------------------*/
+var VAL = {1:100, 2:320, 3:330, 4:500, 5:900, 6:20000};
+var PST = {
+  1:[ 0,  0,  0,  0,  0,  0,  0,  0,
+     50, 50, 50, 50, 50, 50, 50, 50,
+     10, 10, 20, 30, 30, 20, 10, 10,
+      5,  5, 10, 25, 25, 10,  5,  5,
+      0,  0,  0, 20, 20,  0,  0,  0,
+      5, -5,-10,  0,  0,-10, -5,  5,
+      5, 10, 10,-20,-20, 10, 10,  5,
+      0,  0,  0,  0,  0,  0,  0,  0],
+  2:[-50,-40,-30,-30,-30,-30,-40,-50,
+     -40,-20,  0,  0,  0,  0,-20,-40,
+     -30,  0, 10, 15, 15, 10,  0,-30,
+     -30,  5, 15, 20, 20, 15,  5,-30,
+     -30,  0, 15, 20, 20, 15,  0,-30,
+     -30,  5, 10, 15, 15, 10,  5,-30,
+     -40,-20,  0,  5,  5,  0,-20,-40,
+     -50,-40,-30,-30,-30,-30,-40,-50],
+  3:[-20,-10,-10,-10,-10,-10,-10,-20,
+     -10,  0,  0,  0,  0,  0,  0,-10,
+     -10,  0,  5, 10, 10,  5,  0,-10,
+     -10,  5,  5, 10, 10,  5,  5,-10,
+     -10,  0, 10, 10, 10, 10,  0,-10,
+     -10, 10, 10, 10, 10, 10, 10,-10,
+     -10,  5,  0,  0,  0,  0,  5,-10,
+     -20,-10,-10,-10,-10,-10,-10,-20],
+  4:[  0,  0,  0,  0,  0,  0,  0,  0,
+       5, 10, 10, 10, 10, 10, 10,  5,
+      -5,  0,  0,  0,  0,  0,  0, -5,
+      -5,  0,  0,  0,  0,  0,  0, -5,
+      -5,  0,  0,  0,  0,  0,  0, -5,
+      -5,  0,  0,  0,  0,  0,  0, -5,
+      -5,  0,  0,  0,  0,  0,  0, -5,
+       0,  0,  0,  5,  5,  0,  0,  0],
+  5:[-20,-10,-10, -5, -5,-10,-10,-20,
+     -10,  0,  0,  0,  0,  0,  0,-10,
+     -10,  0,  5,  5,  5,  5,  0,-10,
+      -5,  0,  5,  5,  5,  5,  0, -5,
+       0,  0,  5,  5,  5,  5,  0, -5,
+     -10,  5,  5,  5,  5,  5,  0,-10,
+     -10,  0,  5,  0,  0,  0,  0,-10,
+     -20,-10,-10, -5, -5,-10,-10,-20],
+  6:[-30,-40,-40,-50,-50,-40,-40,-30,
+     -30,-40,-40,-50,-50,-40,-40,-30,
+     -30,-40,-40,-50,-50,-40,-40,-30,
+     -30,-40,-40,-50,-50,-40,-40,-30,
+     -20,-30,-30,-40,-40,-30,-30,-20,
+     -10,-20,-20,-20,-20,-20,-20,-10,
+      20, 20,  0,  0,  0,  0, 20, 20,
+      20, 30, 10,  0,  0, 10, 30, 20]
+};
+var PST_KING_END =
+    [-50,-40,-30,-20,-20,-30,-40,-50,
+     -30,-20,-10,  0,  0,-10,-20,-30,
+     -30,-10, 20, 30, 30, 20,-10,-30,
+     -30,-10, 30, 40, 40, 30,-10,-30,
+     -30,-10, 30, 40, 40, 30,-10,-30,
+     -30,-10, 20, 30, 30, 20,-10,-30,
+     -30,-30,  0,  0,  0,  0,-30,-30,
+     -50,-30,-30,-30,-30,-30,-30,-50];
+var MATE = 100000;
+
+function pstIndex(sq, color){
+  var r = sq >> 4, f = sq & 15;
+  return color === WHITE ? r*8 + f : (7-r)*8 + f;
+}
+function evaluate(st){
+  var score = 0, b = st.b, phase = 0, i;
+  for(i=0;i<128;i++){
+    if(i & 0x88){ i += 7; continue; }
+    var p = b[i];
+    if(!p) continue;
+    var t = pType(p);
+    if(t !== PAWN && t !== KING) phase += VAL[t];
+  }
+  var endgame = phase < 1400;
+  for(i=0;i<128;i++){
+    if(i & 0x88){ i += 7; continue; }
+    var pc = b[i];
+    if(!pc) continue;
+    var ty = pType(pc), c = pColor(pc);
+    var table = (ty === KING && endgame) ? PST_KING_END : PST[ty];
+    var v = VAL[ty] + table[pstIndex(i, c)];
+    score += c === WHITE ? v : -v;
+  }
+  return st.turn === WHITE ? score : -score;
+}
+
+function scoreMove(m){
+  if(m.flags & F_CAPTURE) return 10000 + VAL[pType(m.captured)] * 10 - VAL[pType(m.piece)];
+  if(m.promo) return 9000 + VAL[m.promo];
+  if(m.flags & (F_KSIDE|F_QSIDE)) return 500;
+  return 0;
+}
+function ordered(moves){
+  return moves.map(function(m){ return {m:m, s:scoreMove(m)}; })
+              .sort(function(a,b){ return b.s - a.s; })
+              .map(function(o){ return o.m; });
+}
+
+var SEARCH = {nodes:0, deadline:0, aborted:false};
+function timeUp(){
+  if(SEARCH.aborted) return true;
+  if((SEARCH.nodes & 1023) === 0 && Date.now() > SEARCH.deadline) SEARCH.aborted = true;
+  return SEARCH.aborted;
+}
+
+function quiesce(st, alpha, beta){
+  SEARCH.nodes++;
+  if(timeUp()) return alpha;
+  var stand = evaluate(st);
+  if(stand >= beta) return beta;
+  if(stand > alpha) alpha = stand;
+  var caps = ordered(legalMoves(st, true));
+  for(var i=0;i<caps.length;i++){
+    makeMove(st, caps[i], true);
+    var sc = -quiesce(st, -beta, -alpha);
+    unmakeMove(st);
+    if(timeUp()) return alpha;
+    if(sc >= beta) return beta;
+    if(sc > alpha) alpha = sc;
+  }
+  return alpha;
+}
+
+function negamax(st, depth, alpha, beta, ply, useQ){
+  SEARCH.nodes++;
+  if(timeUp()) return alpha;
+  var moves = legalMoves(st);
+  if(!moves.length) return inCheck(st, st.turn) ? -MATE + ply : 0;
+  if(st.half >= 100) return 0;
+  if(depth <= 0) return useQ ? quiesce(st, alpha, beta) : evaluate(st);
+  moves = ordered(moves);
+  for(var i=0;i<moves.length;i++){
+    makeMove(st, moves[i], true);
+    var sc = -negamax(st, depth-1, -beta, -alpha, ply+1, useQ);
+    unmakeMove(st);
+    if(timeUp()) return alpha;
+    if(sc >= beta) return beta;
+    if(sc > alpha) alpha = sc;
+  }
+  return alpha;
+}
+
+/* devolve {move, score} para o lado da vez */
+function searchBest(st, depth, ms, useQ, noise){
+  SEARCH.nodes = 0;
+  SEARCH.aborted = false;
+  SEARCH.deadline = Date.now() + (ms || 3000);
+  var moves = ordered(legalMoves(st));
+  if(!moves.length) return null;
+  var best = moves[0], bestScore = -Infinity, scored = [];
+  for(var d = 1; d <= depth; d++){
+    var localBest = null, localScore = -Infinity, localList = [];
+    for(var i=0;i<moves.length;i++){
+      makeMove(st, moves[i], true);
+      var sc = -negamax(st, d-1, -Infinity, Infinity, 1, useQ);
+      unmakeMove(st);
+      if(SEARCH.aborted) break;
+      localList.push({m:moves[i], s:sc});
+      if(sc > localScore){ localScore = sc; localBest = moves[i]; }
+    }
+    if(SEARCH.aborted) break;
+    best = localBest; bestScore = localScore; scored = localList;
+    /* a melhor da iteração vai primeiro na próxima */
+    moves = localList.sort(function(a,b){ return b.s - a.s; }).map(function(o){ return o.m; });
+    if(bestScore > MATE - 100) break;
+  }
+  if(noise && scored.length){
+    /* níveis fáceis: escolhe entre os lances quase tão bons, para dar chance ao aluno */
+    var pool = scored.filter(function(o){ return o.s >= bestScore - noise; });
+    var pick = pool[Math.floor(Math.random() * pool.length)];
+    return {move:pick.m, score:pick.s, nodes:SEARCH.nodes};
+  }
+  return {move:best, score:bestScore, nodes:SEARCH.nodes};
+}
+
+var LEVELS = {
+  1:{name:"Aprendiz",  depth:1, ms:400,  q:false, noise:120},
+  2:{name:"Casual",    depth:2, ms:900,  q:false, noise:40},
+  3:{name:"Clube",     depth:3, ms:2000, q:true,  noise:0},
+  4:{name:"Forte",     depth:4, ms:4000, q:true,  noise:0}
+};
+function aiMove(st, level){
+  var cfg = LEVELS[level] || LEVELS[2];
+  return searchBest(st, cfg.depth, cfg.ms, cfg.q, cfg.noise);
+}
+/*AI-END*/
+</script>
+
+<script>
+/*DATA-START*/
+/* ---------------------------------------------------------------
+   Conteúdo: lições e exercícios. Todas as posições e soluções são
+   conferidas pelo motor em test/engine.test.mjs.
+----------------------------------------------------------------*/
+var LESSONS = [
+{ id:"tabuleiro", title:"O tabuleiro", sub:"Coordenadas e a montagem correta", kicker:"Lição 1",
+  blocks:[
+  {t:"p", text:"São 64 casas: oito *colunas*, marcadas de **a** até **h**, e oito *fileiras*, numeradas de **1** a **8**. Cada casa tem um nome só dela — a coluna vem primeiro, depois a fileira."},
+  {t:"board", fen:"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", marks:["e4","d5"],
+   caption:"As duas casas marcadas são e4 e d5. Repare nas letras e nos números nas bordas do tabuleiro — você vai usá-los o tempo todo."},
+  {t:"h", text:"Montando o tabuleiro"},
+  {t:"ul", items:[
+    "A casa do canto direito de cada jogador é **clara**. Se a da direita for escura, gire o tabuleiro.",
+    "Nas pontas vão as **torres**; ao lado delas os **cavalos**; depois os **bispos**.",
+    "A **dama vai na casa da própria cor**: dama branca em casa clara (d1), dama preta em casa escura (d8).",
+    "O **rei** fica na casa que sobrou, ao lado da dama (e1 e e8)."
+  ]},
+  {t:"note", text:"Regra de bolso: *dama na sua cor*. Se a dama branca estiver numa casa escura, alguma coisa está trocada."},
+  {t:"p", text:"As brancas sempre começam. Depois os jogadores se alternam, um lance cada."}
+]},
+
+{ id:"linhas", title:"Torre, bispo e dama", sub:"As peças que deslizam pelo tabuleiro", kicker:"Lição 2",
+  blocks:[
+  {t:"p", text:"A **torre** anda em linha reta: pela coluna ou pela fileira, quantas casas quiser."},
+  {t:"board", fen:"7k/8/8/8/3R4/8/8/K7 w - - 0 1", interactive:true,
+   caption:"Toque na torre para ver aonde ela pode ir."},
+  {t:"p", text:"O **bispo** anda nas diagonais. Consequência importante: um bispo que começa em casa clara passa a partida inteira em casas claras — metade do tabuleiro nunca é dele."},
+  {t:"board", fen:"7k/8/8/8/3B4/8/8/K7 w - - 0 1", interactive:true,
+   caption:"Toque no bispo. Conte: são sempre casas da mesma cor."},
+  {t:"p", text:"A **dama** junta as duas: retas e diagonais. É a peça mais forte do jogo."},
+  {t:"board", fen:"7k/8/8/8/3Q4/8/8/K7 w - - 0 1", interactive:true,
+   caption:"A dama alcança até 27 casas de uma posição central. Por isso ela vale tanto."},
+  {t:"h", text:"Ninguém pula"},
+  {t:"p", text:"Torre, bispo e dama param onde encontram uma peça. Se a peça for adversária, podem capturá-la ocupando a casa dela; se for sua, param antes."},
+  {t:"board", fen:"7k/8/3p4/8/3R2p1/8/8/K7 w - - 0 1", interactive:true,
+   caption:"Toque na torre: pela coluna d ela vai só até o peão preto (que pode capturar), e pela fileira 4 ela para no peão em g4."}
+]},
+
+{ id:"cavalo", title:"Cavalo e rei", sub:"O saltador e a peça mais importante", kicker:"Lição 3",
+  blocks:[
+  {t:"p", text:"O **cavalo** anda em L: duas casas numa direção e uma na perpendicular. Ele é o único que **pula** por cima de qualquer peça."},
+  {t:"board", fen:"7k/8/8/8/3N4/8/8/K7 w - - 0 1", interactive:true,
+   caption:"Oito casas no centro. Toque no cavalo e repare: ele sempre muda a cor da casa em que está."},
+  {t:"board", fen:"7k/8/8/2PPP3/2PNP3/2PPP3/8/K7 w - - 0 1", interactive:true,
+   caption:"Cercado por peças amigas, o cavalo continua com os mesmos oito destinos. Ele pula."},
+  {t:"p", text:"O **rei** anda uma casa em qualquer direção. Ele nunca é capturado — mas também **não pode entrar numa casa atacada**, e dois reis nunca podem ficar colados."},
+  {t:"board", fen:"8/8/8/3K4/8/8/8/7k w - - 0 1", interactive:true,
+   caption:"O rei alcança as oito casas vizinhas, desde que nenhuma esteja sob ataque."},
+  {t:"note", text:"O cavalo é lento — leva três lances para atravessar o tabuleiro. Por isso ele gosta do **centro** e detesta a borda: no canto ele tem só duas casas."}
+]},
+
+{ id:"peao", title:"O peão", sub:"Anda de um jeito, captura de outro", kicker:"Lição 4",
+  blocks:[
+  {t:"p", text:"O peão é a única peça que **anda de um jeito e captura de outro**: avança em linha reta, mas come na diagonal. E nunca anda para trás."},
+  {t:"board", fen:"7k/8/8/8/8/4p3/3P4/K7 w - - 0 1", interactive:true,
+   caption:"Toque no peão branco em d2: ele pode ir a d3, dar o salto duplo até d4 (só na primeira jogada de cada peão) ou capturar o peão preto em e3."},
+  {t:"h", text:"Promoção"},
+  {t:"p", text:"Peão que chega à última fileira **vira outra peça** na hora: dama, torre, bispo ou cavalo, você escolhe. Quase sempre a escolha é a dama."},
+  {t:"board", fen:"8/3P4/8/7k/8/8/8/K7 w - - 0 1", moves:["d7d8q"],
+   caption:"d8=D. Você pode ter duas, três, oito damas — não existe limite."},
+  {t:"note", text:"Peões não voltam. Cada avanço é definitivo, então pense antes de empurrar peões na frente do seu rei."}
+]},
+
+{ id:"especiais", title:"Os dois lances especiais", sub:"Roque e captura en passant", kicker:"Lição 5",
+  blocks:[
+  {t:"h", text:"Roque"},
+  {t:"p", text:"É o único lance em que **duas peças se movem juntas**. O rei anda duas casas na direção da torre e a torre pula para o outro lado dele. Serve para tirar o rei do centro e ativar a torre."},
+  {t:"board", fen:"r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1", moves:["e1g1"],
+   caption:"Roque pequeno (O-O), do lado do rei: Re1–g1 e Th1–f1."},
+  {t:"board", fen:"r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1", moves:["e1c1"],
+   caption:"Roque grande (O-O-O), do lado da dama: Re1–c1 e Ta1–d1."},
+  {t:"ul", items:[
+    "O rei e aquela torre **nunca podem ter se movido** na partida.",
+    "As casas entre eles precisam estar **vazias**.",
+    "O rei **não pode estar em xeque**, nem passar por uma casa atacada, nem terminar em xeque.",
+    "A **torre pode** passar por casa atacada — a restrição é só do rei."
+  ]},
+  {t:"h", text:"En passant"},
+  {t:"p", text:"Quando um peão usa o salto duplo e passa *ao lado* de um peão adversário, esse peão pode capturá-lo como se ele tivesse andado só uma casa."},
+  {t:"board", fen:"4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 2", moves:["e5d6"],
+   caption:"O peão preto acabou de jogar d7–d5. As brancas respondem exd6 — o peão capturado sai do tabuleiro mesmo estando em d5."},
+  {t:"note", text:"Vale **só na jogada imediatamente seguinte**. Se você jogar outra coisa, o direito acaba."}
+]},
+
+{ id:"xeque", title:"Xeque, mate e afogamento", sub:"Como as partidas terminam", kicker:"Lição 6",
+  blocks:[
+  {t:"p", text:"**Xeque** é o rei sob ataque. Não é o fim: é uma obrigação — você *precisa* resolver, e só pode jogar um lance que tire o rei do ataque."},
+  {t:"p", text:"Existem três saídas: **mover** o rei, **capturar** quem ataca ou **bloquear** a linha do ataque (isso não funciona contra cavalo nem contra peão, que não têm linha)."},
+  {t:"board", fen:"1n1qk3/8/p7/1B6/8/8/8/4K3 b - - 0 1", interactive:true,
+   caption:"As pretas estão em xeque pelo bispo em b5 e têm as três saídas: axb5 captura, Cc6 e Dd7 bloqueiam, e o rei ainda pode ir para e7."},
+  {t:"h", text:"Xeque-mate"},
+  {t:"p", text:"Quando o rei está em xeque e **nenhum** lance legal o salva, é xeque-mate: fim de partida na hora."},
+  {t:"board", fen:"6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1", moves:["a1a8"],
+   caption:"Ta8# — o mate do corredor. Os próprios peões trancam o rei preto na oitava fileira."},
+  {t:"h", text:"Afogamento: o empate traiçoeiro"},
+  {t:"p", text:"Se o jogador da vez **não está em xeque** mas não tem nenhum lance legal, a partida é **empate** — mesmo que ele esteja com peças a menos."},
+  {t:"board", fen:"7k/5Q2/6K1/8/8/8/8/8 b - - 0 1",
+   caption:"Pretas na vez, sem xeque e sem nenhum lance possível: empate. Com uma dama a mais, as brancas jogaram perto demais."},
+  {t:"note", text:"Quando estiver ganhando muito, **confira sempre se o adversário tem algum lance** antes de fechar o cerco."}
+]},
+
+{ id:"empates", title:"Empates e o valor das peças", sub:"Quanto vale cada peça na hora de trocar", kicker:"Lição 7",
+  blocks:[
+  {t:"h", text:"As cinco formas de empatar"},
+  {t:"ul", items:[
+    "**Afogamento** — sem xeque e sem lance legal.",
+    "**Repetição tripla** — a mesma posição aparece três vezes.",
+    "**Regra dos 50 lances** — 50 lances de cada lado sem captura e sem mexer peão.",
+    "**Material insuficiente** — ninguém tem peças para dar mate (rei e bispo contra rei, por exemplo).",
+    "**Acordo** — os dois jogadores combinam o empate."
+  ]},
+  {t:"h", text:"Quanto vale cada peça"},
+  {t:"table", rows:[
+    [1,"Peão","1"],
+    [2,"Cavalo","3"],
+    [3,"Bispo","3"],
+    [4,"Torre","5"],
+    [5,"Dama","9"],
+    [6,"Rei","a partida"]
+  ]},
+  {t:"p", text:"Esses números decidem trocas: dar um cavalo (3) para ganhar uma torre (5) é lucro de dois pontos — os jogadores chamam isso de *ganhar a qualidade*."},
+  {t:"note", text:"Os valores são um guia, não uma lei. **O par de bispos** costuma valer mais que bispo e cavalo, e um peão prestes a promover pode valer mais que uma torre."}
+]},
+
+{ id:"notacao", title:"Ler e anotar lances", sub:"A linguagem escrita do xadrez", kicker:"Lição 8",
+  blocks:[
+  {t:"p", text:"Cada peça tem uma inicial. Em português: **R** rei, **D** dama, **T** torre, **B** bispo, **C** cavalo. O peão não tem letra — escreve-se só a casa de destino."},
+  {t:"ul", items:[
+    "**e4** — peão para e4.",
+    "**Cf3** — cavalo para f3.",
+    "**exd5** — o peão da coluna *e* captura em d5.",
+    "**Txe5+** — torre captura em e5 dando xeque.",
+    "**O-O** roque pequeno · **O-O-O** roque grande.",
+    "**e8=D** promoção · **+** xeque · **#** xeque-mate."
+  ]},
+  {t:"board", fen:"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+   moves:["e2e4","e7e5","g1f3","b8c6","f1c4"],
+   caption:"Avance lance a lance: 1.e4 e5 2.Cf3 Cc6 3.Bc4 — é assim que a planilha da partida é lida."},
+  {t:"note", text:"Em sites e livros em inglês as letras mudam (**K Q R B N**), mas o sistema é exatamente o mesmo. As casas — e4, f3, d5 — são iguais no mundo inteiro."}
+]},
+
+{ id:"abertura", title:"Como começar a partida", sub:"Cinco princípios que resolvem os 10 primeiros lances", kicker:"Lição 9",
+  blocks:[
+  {t:"p", text:"Você não precisa decorar aberturas. Nos primeiros lances há três tarefas: **tomar o centro**, **desenvolver as peças** e **proteger o rei**."},
+  {t:"ul", items:[
+    "Abra com um **peão central** (1.e4 ou 1.d4) — ele libera bispo e dama.",
+    "Desenvolva **cavalos e bispos** para casas ativas, um lance cada.",
+    "**Role cedo**, normalmente até o décimo lance.",
+    "Não mova a **mesma peça duas vezes** na abertura sem necessidade.",
+    "Não tire a **dama** cedo: o adversário ganha tempo atacando-a."
+  ]},
+  {t:"board", fen:"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+   moves:["e2e4","e7e5","g1f3","b8c6","f1c4","f8c5","e1g1"],
+   caption:"A Abertura Italiana: peão ao centro, cavalo e bispo desenvolvidos, roque feito. Sete lances e as brancas já estão prontas."},
+  {t:"h", text:"O golpe que todo iniciante leva"},
+  {t:"p", text:"O **mate do pastor** ataca f7, a casa mais fraca das pretas no começo — só o rei a defende."},
+  {t:"board", fen:"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+   moves:["e2e4","e7e5","f1c4","b8c6","d1h5","g8f6","h5f7"],
+   caption:"1.e4 e5 2.Bc4 Cc6 3.Dh5 Cf6?? 4.Dxf7#. A dama chega em f7 protegida pelo bispo de c4."},
+  {t:"note", text:"A defesa é simples: no lugar de 3...Cf6, jogue **3...g6**, atacando a dama. Sempre que a dama adversária sair cedo, pergunte-se: *o que ela está ameaçando?*"}
+]},
+
+{ id:"taticas", title:"Táticas essenciais", sub:"Garfo, cravada e espeto", kicker:"Lição 10",
+  blocks:[
+  {t:"p", text:"Tática é ganhar material à força. Quase toda tática nasce da mesma ideia: **atacar duas coisas de uma vez** — o adversário só salva uma."},
+  {t:"h", text:"Garfo"},
+  {t:"p", text:"Uma peça ataca duas ao mesmo tempo. O cavalo é o rei do garfo, porque ataca casas que nenhuma outra peça defende com facilidade."},
+  {t:"board", fen:"r3k3/8/8/1N6/8/8/8/6K1 w - - 0 1", moves:["b5c7","e8f7","c7a8"],
+   caption:"Cc7+ ataca o rei e a torre. O rei precisa sair do xeque — e a torre cai."},
+  {t:"h", text:"Cravada"},
+  {t:"p", text:"Uma peça não pode sair do lugar porque, atrás dela, está algo mais valioso. Se atrás estiver o rei, a peça fica **imobilizada por lei**: sair seria ilegal."},
+  {t:"board", fen:"4k3/ppp2ppp/2n5/1B6/8/8/PPP2PPP/4K3 w - - 0 1", marks:["b5","c6","e8"],
+   caption:"O cavalo em c6 está cravado contra o rei em e8: ele simplesmente não pode se mover. Ataque-o mais uma vez e ele cai."},
+  {t:"h", text:"Espeto"},
+  {t:"p", text:"A cravada ao contrário: o valioso está **na frente**, é obrigado a fugir e entrega o que estava atrás dele."},
+  {t:"board", fen:"7r/8/8/4k3/8/8/8/2B3K1 w - - 0 1", moves:["c1b2","e5d6","b2h8"],
+   caption:"Bb2+ enfia o rei e a torre na mesma diagonal. O rei sai, o bispo leva a torre."},
+  {t:"note", text:"Antes de cada lance, faça a pergunta de ouro: **o que meu adversário está ameaçando?** Metade das táticas que você sofre morrem nessa pergunta."}
+]},
+
+{ id:"mates", title:"Dois mates que você precisa saber", sub:"Terminar a partida quando está ganho", kicker:"Lição 11",
+  blocks:[
+  {t:"p", text:"Ganhar material não é ganhar a partida. Estes dois mates finalizam quase todo final vencido."},
+  {t:"h", text:"Mate com a dama"},
+  {t:"p", text:"A dama empurra o rei adversário até a **borda**; o seu rei sobe para dar apoio; a dama entrega o mate na última fileira. Cuidado com o afogamento: deixe sempre uma casa livre até a hora do golpe."},
+  {t:"board", fen:"7k/8/6K1/8/8/8/8/Q7 w - - 0 1", moves:["a1a8"],
+   caption:"Da8#. O rei branco em g6 cobre g7 e h7; a dama cobre a oitava fileira inteira."},
+  {t:"h", text:"Mate da escada"},
+  {t:"p", text:"Com duas torres você nem precisa do rei. Uma torre corta uma fileira, a outra dá o xeque na fileira seguinte — e assim o rei sobe degrau a degrau até a borda."},
+  {t:"board", fen:"7k/8/8/8/8/8/R7/1R5K w - - 0 1", moves:["b1b7","h8g8","a2a8"],
+   caption:"Tb7 tira a sétima fileira do rei; ele só tem g8; Ta8# fecha a oitava."},
+  {t:"note", text:"Treine estes dois no modo **2 jogadores**: monte a posição mentalmente, jogue os dois lados e cronometre. Em pouco tempo sai no automático."}
+]}
+];
+
+var PUZZLES = [
+{ title:"O mate do corredor", prompt:"Brancas jogam e dão mate em 1",
+  hint:"Os peões pretos trancam o próprio rei. Use a oitava fileira.",
+  fen:"6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1", line:["a1a8"], mateIn:1 },
+
+{ title:"A dama fecha a oitava", prompt:"Brancas jogam e dão mate em 1",
+  hint:"O rei branco em g6 já cobre g7 e h7. Falta cobrir g8 e h8.",
+  fen:"7k/8/6K1/8/8/8/8/Q7 w - - 0 1", line:["a1a8"], mateIn:1 },
+
+{ title:"Escada de torres", prompt:"Brancas jogam e dão mate em 1",
+  hint:"Uma torre já cortou a sétima fileira. A outra tem uma fileira só para chamar de sua.",
+  fen:"6k1/1R6/8/8/8/8/8/R5K1 w - - 0 1", line:["a1a8"], mateIn:1 },
+
+{ title:"Rei e torre, oposição", prompt:"Brancas jogam e dão mate em 1",
+  hint:"Os dois reis estão frente a frente: o rei branco já tira três casas do preto.",
+  fen:"4k3/8/4K3/8/8/8/8/7R w - - 0 1", line:["h1h8"], mateIn:1 },
+
+{ title:"Mate do pastor", prompt:"Brancas jogam e dão mate em 1",
+  hint:"f7 só é defendida pelo rei — e a dama tem um bispo atrás dela.",
+  fen:"r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+  line:["h5f7"], mateIn:1 },
+
+{ title:"Mate afogado", prompt:"Brancas jogam e dão mate em 1",
+  hint:"O rei preto está cercado pelas próprias peças. Quem pula?",
+  fen:"6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1", line:["g5f7"], mateIn:1 },
+
+{ title:"Promoção decisiva", prompt:"Brancas jogam e dão mate em 1",
+  hint:"O peão em b7 chega. Escolha a peça que cobre a oitava fileira inteira.",
+  fen:"6k1/1P3ppp/8/8/8/8/8/6K1 w - - 0 1", line:["b7b8q"], mateIn:1 },
+
+{ title:"Degrau a degrau", prompt:"Brancas jogam e dão mate em 2",
+  hint:"Não dê xeque ainda. Primeiro tire uma fileira do rei preto.",
+  fen:"7k/8/8/8/8/8/R7/1R5K w - - 0 1", line:["b1b7","h8g8","a2a8"], mateIn:2 },
+
+{ title:"A herança de Philidor", prompt:"Brancas jogam e dão mate em 2",
+  hint:"A dama vale menos que o mate. O cavalo em h6 protege uma casa muito especial.",
+  fen:"5r1k/6pp/7N/8/8/1Q6/8/6K1 w - - 0 1", line:["b3g8","f8g8","h6f7"], mateIn:2 },
+
+{ title:"Garfo de cavalo", prompt:"Brancas jogam e ganham material",
+  hint:"Existe uma casa de onde o cavalo ataca o rei e a torre ao mesmo tempo.",
+  fen:"r3k3/8/8/1N6/8/8/8/6K1 w - - 0 1", line:["b5c7","e8f7","c7a8"] },
+
+{ title:"Espeto na diagonal", prompt:"Brancas jogam e ganham material",
+  hint:"Coloque o rei e a torre pretos na mesma diagonal.",
+  fen:"7r/8/8/4k3/8/8/8/2B3K1 w - - 0 1", line:["c1b2","e5d6","b2h8"] },
+
+{ title:"Mate de Anastasia", prompt:"Brancas jogam e dão mate em 2",
+  hint:"O cavalo em e7 já tira g8 e g6 do rei preto. A dama vale menos que o mate.",
+  fen:"5rk1/4Nppp/8/7Q/8/8/8/K2R4 w - - 0 1", line:["h5h7","g8h7","d1h1"], mateIn:2 }
+];
+
+var PAWN_FORK = { title:"Garfo de peão", prompt:"Brancas jogam e ganham uma peça",
+  hint:"Um peão pode atacar duas peças de uma vez — e nenhum cavalo defende a casa do avanço.",
+  fen:"6k1/8/8/2n1n3/8/3P4/5PPP/6K1 w - - 0 1", line:["d3d4"] };
+PUZZLES.splice(9, 0, PAWN_FORK);
+/*DATA-END*/
+</script>
+
+<script>
+/*UI-START*/
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+/* ---------- peças desenhadas em SVG (caixa 45x45) ----------
+   Base comum (saia + pé) para todas; o topo é o que distingue cada peça. */
+var P_FOOT = '<path class="sh" d="M14 34.5h17l2.5 5h-22z"/>' +
+             '<rect class="sh" x="10" y="39.4" width="25" height="3.6" rx="1.7"/>';
+var P_TOP = {
+  1:'<circle class="sh" cx="22.5" cy="13" r="5.2"/>' +
+    '<path class="sh" d="M18.6 17.8h7.8l3.1 16.7h-14z"/>',
+  2:'<path class="sh" d="M14 34.5C14 26 16 21 21.5 18.5c-2.5-.5-5 .3-6.9 1.7l-2.8 2.1c-.9.7-2-.2-1.6-1.3l2-5.4c1.4-3.7 4.6-6.3 8.4-7l1.2-3.1 1.6 2.9 2.2-2.6.7 3.1c4.6 1.3 7.7 5.4 7.7 10.2v15.4z"/>' +
+    '<circle class="det" cx="17.6" cy="15.2" r="1.1" style="fill:currentColor;stroke:none"/>',
+  3:'<circle class="sh" cx="22.5" cy="6.4" r="1.9"/>' +
+    '<path class="sh" d="M22.5 8.6c4.2 3.4 6.8 6.6 6.8 10.4 0 3.7-3 6.3-6.8 6.3s-6.8-2.6-6.8-6.3c0-3.8 2.6-7 6.8-10.4z"/>' +
+    '<path class="det" d="M20 17.6l5-4.8"/>' +
+    '<rect class="sh" x="16" y="25" width="13" height="2.9" rx="1.2"/>' +
+    '<path class="sh" d="M17.6 27.9h9.8l2.4 6.6h-14.6z"/>',
+  4:'<path class="sh" d="M13 8h4.5v3.5h2.8V8h4.4v3.5h2.8V8H32v7.5H13z"/>' +
+    '<path class="sh" d="M15.2 15.5h14.6l1.8 19h-18.2z"/>',
+  5:'<circle class="sh" cx="10.5" cy="11.6" r="2"/><circle class="sh" cx="16.5" cy="9.6" r="2"/>' +
+    '<circle class="sh" cx="22.5" cy="8.4" r="2.2"/><circle class="sh" cx="28.5" cy="9.6" r="2"/>' +
+    '<circle class="sh" cx="34.5" cy="11.6" r="2"/>' +
+    '<path class="sh" d="M10.5 11.6L14.4 23h16.2l3.9-11.4L30 18.5 28.5 9.6 25.5 18.5 22.5 8.8 19.5 18.5 16.5 9.6 15 18.5z"/>' +
+    '<rect class="sh" x="13.6" y="22.9" width="17.8" height="3.1" rx="1.3"/>' +
+    '<path class="sh" d="M15 26h15l1.5 8.5h-18z"/>',
+  6:'<path class="sh" d="M21.2 3.5h2.6v3h3v2.6h-3v3.2h-2.6V9.1h-3V6.5h3z"/>' +
+    '<path class="sh" d="M22.5 13.5c5.5 0 9.5 3.4 9.5 7.6 0 2.4-1.2 4.3-2.6 5.6H15.6c-1.4-1.3-2.6-3.2-2.6-5.6 0-4.2 4-7.6 9.5-7.6z"/>' +
+    '<rect class="sh" x="14.4" y="26.6" width="16.2" height="3.1" rx="1.3"/>' +
+    '<path class="sh" d="M15.6 29.7h13.8l1.6 4.8h-17z"/>'
+};
+var PIECE_CACHE = {};
+function pieceNode(t, color){
+  var key = t + (color === WHITE ? "w" : "b");
+  if(!PIECE_CACHE[key]){
+    var tpl = document.createElement("div");
+    tpl.innerHTML = '<svg class="pc ' + (color === WHITE ? "w" : "b") + '" viewBox="0 0 45 45" ' +
+      'xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' + P_TOP[t] + P_FOOT + "</svg>";
+    PIECE_CACHE[key] = tpl.firstChild;
+  }
+  return PIECE_CACHE[key].cloneNode(true);
+}
+function pieceHTML(t, color){
+  return '<svg class="pc ' + (color === WHITE ? "w" : "b") + '" viewBox="0 0 45 45" aria-hidden="true">' +
+    P_TOP[t] + P_FOOT + "</svg>";
+}
+/* ícone chapado, na cor do texto — para abas, status e marca */
+function iconHTML(t){
+  return '<svg class="ico" viewBox="0 0 45 45" aria-hidden="true">' +
+    (P_TOP[t] + P_FOOT).replace(/class="sh"/g, "").replace(/<path class="det"[^>]*>/g, "") + "</svg>";
+}
+var NAMES = {1:"peão",2:"cavalo",3:"bispo",4:"torre",5:"dama",6:"rei"};
+
+/* ---------- iPhone: tela cheia e ícone na tela de início ---------- */
+(function iosSetup(){
+  try{
+    var vp = document.querySelector('meta[name="viewport"]');
+    if(vp) vp.setAttribute("content","width=device-width, initial-scale=1, viewport-fit=cover");
+    [["apple-mobile-web-app-capable","yes"],
+     ["mobile-web-app-capable","yes"],
+     ["apple-mobile-web-app-status-bar-style","default"],
+     ["apple-mobile-web-app-title","Xadrez"],
+     ["theme-color","#3E5C46"]].forEach(function(p){
+      var m = document.createElement("meta"); m.name = p[0]; m.content = p[1];
+      document.head.appendChild(m);
+    });
+    var cv = document.createElement("canvas"); cv.width = cv.height = 180;
+    var cx = cv.getContext("2d");
+    cx.fillStyle = "#3E5C46"; cx.fillRect(0,0,180,180);
+    cx.fillStyle = "#E6E4D6";
+    cx.font = "128px Georgia, serif"; cx.textAlign = "center"; cx.textBaseline = "middle";
+    cx.fillText("♞", 90, 100);
+    var icon = cv.toDataURL("image/png");
+    var lk = document.createElement("link"); lk.rel = "apple-touch-icon"; lk.href = icon;
+    document.head.appendChild(lk);
+    var man = {name:"Xadrez de Bolso", short_name:"Xadrez", display:"standalone",
+      background_color:"#EDEFEA", theme_color:"#3E5C46", start_url:".",
+      icons:[{src:icon, sizes:"180x180", type:"image/png"}]};
+    var ml = document.createElement("link"); ml.rel = "manifest";
+    ml.href = URL.createObjectURL(new Blob([JSON.stringify(man)],{type:"application/manifest+json"}));
+    document.head.appendChild(ml);
+  }catch(e){}
+})();
+
+/* ---------- armazenamento local ---------- */
+var STORE = "xadrez-de-bolso-v1";
+function load(){ try{ return JSON.parse(localStorage.getItem(STORE)) || {}; }catch(e){ return {}; } }
+function save(){
+  try{
+    localStorage.setItem(STORE, JSON.stringify({
+      moves:G.uci, mode:G.mode, level:G.level, side:G.side, flip:G.flip, clockCfg:G.clockCfg,
+      hints:G.hints, sound:G.sound, installHidden:G.installHidden,
+      done:Object.keys(G.done), solved:Object.keys(G.solved)
+    }));
+  }catch(e){}
+}
+
+/* ---------- som ---------- */
+var AC = null;
+function tone(freq, dur, gain, type){
+  if(!G.sound) return;
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if(AC.state === "suspended") AC.resume();
+    var o = AC.createOscillator(), g = AC.createGain();
+    o.type = type || "triangle"; o.frequency.value = freq;
+    g.gain.setValueAtTime(gain, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + dur);
+    o.connect(g); g.connect(AC.destination);
+    o.start(); o.stop(AC.currentTime + dur);
+  }catch(e){}
+}
+function sfx(kind){
+  if(kind === "move")    tone(330, .07, .07);
+  if(kind === "capture") tone(180, .11, .10, "sawtooth");
+  if(kind === "check")   { tone(660, .09, .08); setTimeout(function(){ tone(880,.12,.07); }, 90); }
+  if(kind === "win")     { [523,659,784].forEach(function(f,i){ setTimeout(function(){ tone(f,.18,.08); }, i*130); }); }
+  if(kind === "bad")     tone(150, .16, .07, "square");
+}
+
+/* ---------- desenho do tabuleiro ---------- */
+function renderBoard(el, st, o){
+  o = o || {};
+  var frag = document.createDocumentFragment();
+  el.classList.toggle("flip", !!o.flip);
+  var checkSq = -1;
+  if(o.check) checkSq = st.kings[st.turn];
+  var marks = (o.marks || []).map(nameSq);
+  for(var r=0;r<8;r++){
+    for(var f=0;f<8;f++){
+      var sq = r*16 + f, d = document.createElement("div");
+      var dark = (r + f) % 2 === 1;
+      d.className = "sq " + (dark ? "d" : "l");
+      d.dataset.sq = sq;
+      if(o.last && (sq === o.last[0] || sq === o.last[1])) d.classList.add("last");
+      if(o.sel === sq) d.classList.add("sel");
+      if(sq === checkSq) d.classList.add("check");
+      if(r === 7){
+        var cf = document.createElement("span"); cf.className = "co f";
+        cf.textContent = "abcdefgh"[f]; d.appendChild(cf);
+      }
+      if(f === 0){
+        var cr = document.createElement("span"); cr.className = "co r";
+        cr.textContent = String(8 - r); d.appendChild(cr);
+      }
+      var p = st.b[sq];
+      if(p){
+        d.appendChild(pieceNode(pType(p), pColor(p)));
+        d.setAttribute("aria-label", sqName(sq) + ": " + (pColor(p)===WHITE?"branca ":"preta ") + NAMES[pType(p)]);
+      } else {
+        d.setAttribute("aria-label", sqName(sq) + ": vazia");
+      }
+      if(o.targets && o.targets.indexOf(sq) >= 0){
+        var h = document.createElement("span");
+        h.className = "hint" + (p || (o.epTarget === sq) ? " cap" : "");
+        d.appendChild(h);
+      }
+      if(marks.indexOf(sq) >= 0){
+        var mk = document.createElement("span"); mk.className = "mk"; d.appendChild(mk);
+      }
+      frag.appendChild(d);
+    }
+  }
+  el.textContent = "";
+  el.appendChild(frag);
+}
+function sqFromEvent(e){
+  var t = e.target.closest ? e.target.closest(".sq") : null;
+  return t ? parseInt(t.dataset.sq, 10) : -1;
+}
+
+/* ---------- estado da partida ---------- */
+var G = {
+  st:null, uci:[], sans:[], sel:-1, targets:[], last:null, thinking:false,
+  mode:"ai", level:2, side:WHITE, flip:false, hints:true, sound:true,
+  pending:null, hintMove:null, installHidden:false, done:{}, solved:{}, over:null,
+  clockCfg:"0", clock:null, clockHist:[], timeout:null
+};
+
+/* ---------- relógio ---------- */
+function clockOn(){ return G.clockCfg !== "0"; }
+function clockInit(){
+  G.timeout = null; G.clockHist = [];
+  if(!clockOn()){ G.clock = null; return; }
+  var p = G.clockCfg.split("+"), base = +p[0] * 1000;
+  G.clock = {ms:[base, base], inc:(+p[1] || 0) * 1000, side:WHITE, since:0, running:false};
+}
+function clockLeft(color){
+  var c = G.clock;
+  if(!c) return 0;
+  var t = c.ms[color];
+  if(c.running && c.side === color) t -= (Date.now() - c.since);
+  return Math.max(0, t);
+}
+function clockPause(){
+  var c = G.clock;
+  if(!c || !c.running) return;
+  c.ms[c.side] = Math.max(0, c.ms[c.side] - (Date.now() - c.since));
+  c.running = false;
+}
+function clockResume(){
+  var c = G.clock;
+  if(!c || c.running || G.over || G.timeout || G.uci.length < 2) return;
+  c.side = G.st.turn; c.since = Date.now(); c.running = true;
+}
+/* chamado depois de cada lance: cobra o tempo de quem jogou e passa a vez */
+function clockAfterMove(mover){
+  var c = G.clock;
+  if(!c) return;
+  if(c.running && c.side === mover){
+    c.ms[mover] = Math.max(0, c.ms[mover] - (Date.now() - c.since)) + c.inc;
+  }
+  c.side = 1 - mover; c.since = Date.now();
+  c.running = !G.over && !G.timeout && G.uci.length >= 2;
+}
+/* material suficiente para dar mate — quem não tem, empata quando o outro cai no tempo */
+function canMate(st, color){
+  var minors = 0, b = st.b;
+  for(var i=0;i<128;i++){
+    if(i & 0x88){ i += 7; continue; }
+    var p = b[i];
+    if(!p || pColor(p) !== color) continue;
+    var t = pType(p);
+    if(t === PAWN || t === ROOK || t === QUEEN) return true;
+    if(t === KNIGHT || t === BISHOP) minors++;
+  }
+  return minors >= 2;
+}
+function onFlag(loser){
+  clockPause();
+  G.clock.ms[loser] = 0;
+  G.timeout = {loser:loser, draw:!canMate(G.st, 1-loser)};
+  G.sel = -1; G.targets = [];
+  sfx(G.timeout.draw ? "bad" : "win");
+  drawGame();
+}
+function fmtClock(ms){
+  if(ms <= 0) return "0:00";
+  var s = ms / 1000;
+  if(s < 20) return Math.floor(s/60) + ":" + ("0" + Math.floor(s%60)).slice(-2) + "." + Math.floor((s*10)%10);
+  var m = Math.floor(s/60);
+  return m + ":" + ("0" + Math.floor(s%60)).slice(-2);
+}
+function paintClocks(){
+  var bottomColor = G.flip ? BLACK : WHITE;
+  [["clockBottom", bottomColor], ["clockTop", 1 - bottomColor]].forEach(function(pair){
+    var el = $(pair[0]), color = pair[1];
+    if(!clockOn()){ el.hidden = true; return; }
+    el.hidden = false;
+    var left = clockLeft(color);
+    el.textContent = fmtClock(left);
+    el.classList.toggle("low", left < 30000 && left > 0);
+    el.classList.toggle("out", left <= 0);
+  });
+}
+setInterval(function(){
+  if(!G.clock || !G.clock.running) return;
+  if($("view-play").hidden){ clockPause(); return; }
+  paintClocks();
+  var side = G.clock.side;
+  if(clockLeft(side) <= 0) onFlag(side);
+}, 200);
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden) clockPause();
+  else if(!$("view-play").hidden) clockResume();
+});
+
+function humanTurn(){ return G.mode === "human" || G.st.turn === G.side; }
+
+function newGame(keepSettings){
+  G.st = fenToState(START_FEN);
+  G.uci = []; G.sans = []; G.sel = -1; G.targets = []; G.last = null;
+  G.hintMove = null; G.over = null; G.pending = null; G.thinking = false;
+  G.analysis = null;
+  clockInit();
+  $("promo").hidden = true;
+  G.flip = (G.mode === "ai" && G.side === BLACK);
+  drawGame();
+  if(!keepSettings) save();
+  maybeAI();
+}
+
+function selectSquare(sq){
+  if(G.thinking || G.over || G.pending) return;
+  var st = G.st;
+  if(G.sel >= 0 && G.targets.indexOf(sq) >= 0){
+    var opts = legalMoves(st).filter(function(m){ return m.from === G.sel && m.to === sq; });
+    if(opts.length > 1 && opts[0].promo){ askPromotion(opts); return; }
+    if(opts.length){ applyMove(opts[0]); return; }
+  }
+  var p = st.b[sq];
+  if(p && pColor(p) === st.turn && humanTurn()){
+    G.sel = sq;
+    G.targets = legalMoves(st).filter(function(m){ return m.from === sq; }).map(function(m){ return m.to; });
+  } else {
+    G.sel = -1; G.targets = [];
+  }
+  drawGame();
+}
+
+function askPromotion(opts){
+  G.pending = opts;
+  var box = $("promoOpts");
+  box.textContent = "";
+  [QUEEN, ROOK, BISHOP, KNIGHT].forEach(function(t){
+    var b = document.createElement("button");
+    b.innerHTML = pieceHTML(t, G.st.turn);
+    b.setAttribute("aria-label", "Promover para " + NAMES[t]);
+    b.onclick = function(){
+      var m = opts.filter(function(o){ return o.promo === t; })[0];
+      G.pending = null; $("promo").hidden = true;
+      if(m) applyMove(m);
+    };
+    box.appendChild(b);
+  });
+  $("promo").hidden = false;
+}
+
+function applyMove(m){
+  var san = moveToSan(G.st, m), cap = m.flags & F_CAPTURE, mover = G.st.turn;
+  if(G.clock) G.clockHist.push([G.clock.ms[0], G.clock.ms[1], G.clock.running]);
+  makeMove(G.st, m);
+  G.uci.push(moveToUci(m)); G.sans.push(san);
+  G.last = [m.from, m.to]; G.sel = -1; G.targets = []; G.hintMove = null;
+  var s = gameStatus(G.st);
+  G.over = s.over ? s : null;
+  G.analysis = null;
+  clockAfterMove(mover);
+  if(s.over) clockPause();
+  if(s.over && s.kind === "mate") sfx("win");
+  else if(s.check) sfx("check");
+  else sfx(cap ? "capture" : "move");
+  drawGame();
+  save();
+  maybeAI();
+}
+
+function maybeAI(){
+  if(G.mode !== "ai" || G.over) return;
+  if(G.st.turn === G.side) return;
+  G.thinking = true;
+  drawGame();
+  setTimeout(function(){
+    var res = aiMove(G.st, G.level);
+    G.thinking = false;
+    if(res && res.move) applyMove(res.move);
+    else drawGame();
+  }, 220);
+}
+
+function undo(){
+  if(G.thinking || !G.uci.length) return;
+  var n = (G.mode === "ai" && G.uci.length >= 2 && G.st.turn === G.side) ? 2 : 1;
+  for(var i=0;i<n && G.uci.length;i++){
+    unmakeMove(G.st); G.uci.pop(); G.sans.pop();
+    var snap = G.clockHist.pop();
+    if(snap && G.clock){ G.clock.ms[0] = snap[0]; G.clock.ms[1] = snap[1]; }
+  }
+  G.timeout = null;
+  if(G.clock){ G.clock.side = G.st.turn; G.clock.since = Date.now(); G.clock.running = false; }
+  var h = G.st.hist[G.st.hist.length-1];
+  G.last = h ? [h.m.from, h.m.to] : null;
+  G.sel = -1; G.targets = []; G.over = null; G.hintMove = null; G.analysis = null;
+  drawGame(); save();
+  if(G.mode === "ai" && G.st.turn !== G.side) maybeAI();
+}
+
+function showHint(){
+  if(G.thinking || G.over || !humanTurn()) return;
+  G.thinking = true; drawGame();
+  setTimeout(function(){
+    var res = searchBest(G.st, 3, 1500, true, 0);
+    G.thinking = false;
+    if(res && res.move){
+      G.hintMove = res.move;
+      G.sel = res.move.from;
+      G.targets = legalMoves(G.st).filter(function(m){ return m.from === res.move.from; }).map(function(m){ return m.to; });
+    }
+    drawGame();
+  }, 60);
+}
+
+/* material capturado e vantagem */
+function material(st){
+  var start = {1:8,2:2,3:2,4:2,5:1,6:1}, have = [{},{}], i;
+  for(i=0;i<128;i++){
+    if(i & 0x88){ i += 7; continue; }
+    var p = st.b[i];
+    if(!p) continue;
+    var c = pColor(p), t = pType(p);
+    have[c][t] = (have[c][t] || 0) + 1;
+  }
+  var lost = [[],[]], pts = [0,0];
+  [WHITE,BLACK].forEach(function(c){
+    for(var t=1;t<=5;t++){
+      var miss = start[t] - (have[c][t] || 0);
+      for(var k=0;k<miss;k++) lost[c].push(t);
+      pts[1-c] += miss * VAL[t];
+    }
+  });
+  return {lost:lost, diff:(pts[WHITE] - pts[BLACK]) / 100};
+}
+
+function statusInfo(){
+  var s = gameStatus(G.st);
+  G.over = s.over ? s : null;
+  if(G.timeout){
+    G.over = {over:true, kind:"tempo"};
+    var who = G.timeout.loser === WHITE ? "brancas" : "pretas";
+    if(G.timeout.draw)
+      return {cls:"", ic:"<span>½</span>", text:"Tempo das " + who + " esgotado — empate, o adversário não tem como dar mate"};
+    var win = G.timeout.loser === WHITE ? "pretas" : "brancas";
+    return {cls:"good", ic:iconHTML(6), text:"Tempo esgotado — as " + win + " venceram"};
+  }
+  var whiteName = (G.mode === "ai") ? (G.side === WHITE ? "Você" : "Computador") : "Brancas";
+  var blackName = (G.mode === "ai") ? (G.side === BLACK ? "Você" : "Computador") : "Pretas";
+  var mover = G.st.turn === WHITE ? whiteName : blackName;
+  if(s.over){
+    if(s.kind === "mate"){
+      var w = s.winner === WHITE ? whiteName : blackName;
+      return {cls:"good", ic:iconHTML(6), text:"Xeque-mate — " + w + (w === "Você" ? " venceu!" : " venceram") };
+    }
+    if(s.kind === "afogamento") return {cls:"", ic:"½", text:"Empate por afogamento — sem xeque e sem lance legal"};
+    if(s.kind === "50")         return {cls:"", ic:"<span>½</span>", text:"Empate pela regra dos 50 lances"};
+    if(s.kind === "repeticao")  return {cls:"", ic:"<span>½</span>", text:"Empate por repetição tripla"};
+    return {cls:"", ic:"<span>½</span>", text:"Empate por material insuficiente"};
+  }
+  if(G.thinking) return {cls:"", ic:iconHTML(2), text:"Pensando…", busy:true};
+  if(s.check) return {cls:"alert", ic:"<span>!</span>", text:"Xeque! " + mover + (mover === "Você" ? " precisa" : " precisam") + " salvar o rei"};
+  if(G.hintMove) return {cls:"", ic:"<span>☞</span>", text:"Dica: jogue " + moveToSan(G.st, G.hintMove)};
+  return {cls:"", ic:iconHTML(6),
+          text:(mover === "Você" ? "Sua vez" : "Vez de " + mover) + " · " + (G.st.turn === WHITE ? "brancas" : "pretas")};
+}
+
+function drawGame(){
+  var st = G.st, s = statusInfo();
+  var sb = $("status");
+  sb.className = "status " + s.cls;
+  sb.innerHTML = '<span class="ic" aria-hidden="true">' + s.ic + "</span><span>" + s.text + "</span>" +
+    (s.busy ? '<span class="thinking"><i></i><i></i><i></i></span>' : "");
+
+  renderBoard($("board"), st, {
+    flip:G.flip, sel:G.sel, targets:G.hints ? G.targets : [], last:G.last,
+    check:!G.over && inCheck(st, st.turn),
+    epTarget:st.ep,
+    marks:G.hintMove ? [sqName(G.hintMove.from), sqName(G.hintMove.to)] : []
+  });
+
+  var m = material(st);
+  var bottomColor = G.flip ? BLACK : WHITE, topColor = 1 - bottomColor;
+  function strip(id, color){
+    var el = $(id);
+    el.querySelector(".side").className = "side " + (color === WHITE ? "w" : "b");
+    var isYou = G.mode === "ai" && color === G.side;
+    el.querySelector(".name").textContent = G.mode === "ai"
+      ? (isYou ? "Você" : LEVELS[G.level].name + " (nível " + G.level + ")")
+      : (color === WHITE ? "Brancas" : "Pretas");
+    el.querySelector(".taken").innerHTML = m.lost[1-color].map(function(t){
+      return pieceHTML(t, color === WHITE ? BLACK : WHITE);
+    }).join("");
+    var d = color === WHITE ? m.diff : -m.diff;
+    el.querySelector(".adv").textContent = d > 0 ? "+" + d : "";
+    el.classList.toggle("turn", !G.over && st.turn === color);
+  }
+  strip("stripTop", topColor);
+  strip("stripBottom", bottomColor);
+  paintClocks();
+
+  var ab = $("btnAnalyze");
+  ab.hidden = G.uci.length < 2;
+  ab.textContent = G.over ? "Ver análise da partida →" : "Analisar partida →";
+  ab.className = G.over ? "btn-wide" : "link-btn";
+  $("btnUndo").disabled = !G.uci.length || G.thinking;
+  $("btnHint").disabled = !!G.over || G.thinking || !humanTurn();
+  $("topBadge").textContent = G.mode === "ai"
+    ? "Nível " + G.level + " · " + LEVELS[G.level].name
+    : "2 jogadores";
+
+  var sheet = $("moves");
+  if(!G.sans.length){
+    sheet.innerHTML = '<span class="empty">Os lances aparecem aqui conforme a partida anda.</span>';
+  } else {
+    var rows = "";
+    for(var i=0;i<G.sans.length;i+=2){
+      rows += '<div class="row"><span class="n">' + (i/2 + 1) + '.</span>' +
+        '<span class="mv' + (i === G.sans.length-1 ? " on" : "") + '">' + G.sans[i] + "</span>" +
+        '<span class="mv' + (i+1 === G.sans.length-1 ? " on" : "") + '">' + (G.sans[i+1] || "") + "</span></div>";
+    }
+    sheet.innerHTML = rows;
+    sheet.scrollTop = sheet.scrollHeight;
+  }
+}
+
+/* ---------- ajustes ---------- */
+function seg(id, get, set){
+  var box = $(id);
+  box.addEventListener("click", function(e){
+    var b = e.target.closest("button");
+    if(!b) return;
+    set(b.dataset.v);
+    Array.prototype.forEach.call(box.children, function(c){
+      c.setAttribute("aria-pressed", String(c.dataset.v === String(get())));
+    });
+  });
+  Array.prototype.forEach.call(box.children, function(c){
+    c.setAttribute("aria-pressed", String(c.dataset.v === String(get())));
+  });
+}
+
+/* ---------- lições ---------- */
+function inline(text){
+  return text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
+}
+function renderLessonList(){
+  var list = $("lessonList");
+  list.textContent = "";
+  LESSONS.forEach(function(l, i){
+    var b = document.createElement("button");
+    b.className = "lesson-item";
+    b.innerHTML = '<span class="num">' + (i+1) + '</span><span><span class="tt">' + l.title +
+      '</span><span class="dd">' + l.sub + '</span></span>' +
+      (G.done[l.id] ? '<span class="chk" aria-label="concluída">✓</span>' : "");
+    b.onclick = function(){ openLesson(i); };
+    list.appendChild(b);
+  });
+}
+function makeMini(blk){
+  var wrap = document.createElement("div");
+  var board = document.createElement("div");
+  board.className = "board mini";
+  wrap.appendChild(board);
+  var st = fenToState(blk.fen);
+  var view = {marks:blk.marks || [], last:null, sel:-1, targets:[]};
+  function paint(){ renderBoard(board, st, view); }
+  paint();
+
+  if(blk.moves){
+    var idx = 0, sans = [], states = [];
+    var bar = document.createElement("div"); bar.className = "demo-bar";
+    var prev = document.createElement("button"); prev.textContent = "‹";
+    prev.setAttribute("aria-label","Lance anterior");
+    var lbl = document.createElement("span"); lbl.className = "lbl";
+    var next = document.createElement("button"); next.textContent = "›";
+    next.setAttribute("aria-label","Próximo lance");
+    bar.appendChild(prev); bar.appendChild(lbl); bar.appendChild(next);
+    wrap.appendChild(bar);
+    function label(){
+      lbl.textContent = idx === 0 ? "posição inicial"
+        : "lance " + idx + " de " + blk.moves.length + " · " + sans[idx-1];
+      prev.disabled = idx === 0; next.disabled = idx === blk.moves.length;
+      prev.style.opacity = idx === 0 ? .35 : 1;
+      next.style.opacity = idx === blk.moves.length ? .35 : 1;
+    }
+    next.onclick = function(){
+      if(idx >= blk.moves.length) return;
+      var m = findMoveByUci(st, blk.moves[idx]);
+      if(!m) return;
+      sans[idx] = moveToSan(st, m);
+      makeMove(st, m);
+      view.last = [m.from, m.to];
+      idx++; paint(); label();
+      sfx(m.flags & F_CAPTURE ? "capture" : "move");
+    };
+    prev.onclick = function(){
+      if(idx === 0) return;
+      unmakeMove(st); idx--;
+      var h = st.hist[st.hist.length-1];
+      view.last = h ? [h.m.from, h.m.to] : null;
+      paint(); label();
+    };
+    label();
+  } else if(blk.interactive){
+    board.addEventListener("click", function(e){
+      var sq = sqFromEvent(e);
+      if(sq < 0) return;
+      var p = st.b[sq];
+      if(p && sq !== view.sel){
+        st.turn = pColor(p);
+        view.sel = sq;
+        view.targets = legalMoves(st).filter(function(m){ return m.from === sq; }).map(function(m){ return m.to; });
+        tone(420, .05, .05);
+      } else {
+        view.sel = -1; view.targets = [];
+      }
+      paint();
+    });
+  }
+  if(blk.caption){
+    var cap = document.createElement("p");
+    cap.className = "mini-cap";
+    cap.innerHTML = inline(blk.caption);
+    wrap.appendChild(cap);
+  }
+  return wrap;
+}
+function openLesson(i){
+  var l = LESSONS[i], host = $("learnDetail");
+  host.textContent = "";
+  var top = document.createElement("div");
+  top.className = "lesson-top";
+  var back = document.createElement("button");
+  back.className = "back"; back.innerHTML = "‹ Lições";
+  back.onclick = closeLesson;
+  top.appendChild(back);
+  host.appendChild(top);
+
+  var art = document.createElement("div");
+  art.className = "lesson";
+  art.innerHTML = '<p class="kicker">' + l.kicker + "</p><h2>" + l.title + "</h2>";
+  var blocks = document.createElement("div");
+  blocks.className = "blocks";
+  l.blocks.forEach(function(blk){
+    var el;
+    if(blk.t === "p"){ el = document.createElement("p"); el.className = "tx"; el.innerHTML = inline(blk.text); }
+    else if(blk.t === "h"){ el = document.createElement("h3"); el.textContent = blk.text; }
+    else if(blk.t === "note"){ el = document.createElement("p"); el.className = "note"; el.innerHTML = inline(blk.text); }
+    else if(blk.t === "ul"){
+      el = document.createElement("ul");
+      blk.items.forEach(function(it){
+        var li = document.createElement("li"); li.innerHTML = inline(it); el.appendChild(li);
+      });
+    }
+    else if(blk.t === "table"){
+      el = document.createElement("table"); el.className = "tbl";
+      blk.rows.forEach(function(r){
+        var tr = document.createElement("tr");
+        tr.innerHTML = "<td>" + pieceHTML(r[0], BLACK) + "</td><td>" + r[1] + "</td><td>" + r[2] + "</td>";
+        el.appendChild(tr);
+      });
+    }
+    else if(blk.t === "board"){ el = makeMini(blk); }
+    if(el) blocks.appendChild(el);
+  });
+  art.appendChild(blocks);
+
+  var footer = document.createElement("div");
+  footer.style.cssText = "display:flex;flex-direction:column;gap:9px;margin-top:26px";
+  var doneBtn = document.createElement("button");
+  doneBtn.className = G.done[l.id] ? "btn-ghost" : "btn-wide";
+  doneBtn.textContent = G.done[l.id] ? "✓ Lição concluída" : "Marcar como concluída";
+  doneBtn.onclick = function(){
+    G.done[l.id] = 1; save();
+    doneBtn.className = "btn-ghost"; doneBtn.textContent = "✓ Lição concluída";
+    renderLessonList();
+  };
+  footer.appendChild(doneBtn);
+  if(i + 1 < LESSONS.length){
+    var nx = document.createElement("button");
+    nx.className = "btn-ghost";
+    nx.textContent = "Próxima: " + LESSONS[i+1].title + " →";
+    nx.onclick = function(){ openLesson(i+1); };
+    footer.appendChild(nx);
+  }
+  art.appendChild(footer);
+  host.appendChild(art);
+  $("learnIndex").hidden = true;
+  host.hidden = false;
+  window.scrollTo(0, 0);
+}
+function closeLesson(){
+  $("learnDetail").hidden = true;
+  $("learnDetail").textContent = "";
+  $("learnIndex").hidden = false;
+  renderLessonList();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- exercícios ---------- */
+var P = {i:0, st:null, sel:-1, targets:[], last:null, step:0, done:false, busy:false, pending:null};
+
+function forcesMate(st, m, plies){
+  makeMove(st, m, true);
+  var res = matesIn(st, plies - 1, true);
+  unmakeMove(st);
+  return res;
+}
+/* defending === true: o lado da vez tenta escapar do mate em `plies` meios-lances */
+function matesIn(st, plies, defending){
+  var moves = legalMoves(st);
+  if(defending){
+    if(!moves.length) return inCheck(st, st.turn);
+    if(plies <= 0) return false;
+    for(var i=0;i<moves.length;i++){
+      makeMove(st, moves[i], true);
+      var ok = matesIn(st, plies - 1, false);
+      unmakeMove(st);
+      if(!ok) return false;
+    }
+    return true;
+  }
+  if(plies <= 0) return false;
+  for(var j=0;j<moves.length;j++){
+    makeMove(st, moves[j], true);
+    var good = matesIn(st, plies - 1, true);
+    unmakeMove(st);
+    if(good) return true;
+  }
+  return false;
+}
+
+function puzFeed(text, cls){
+  var el = $("puzFeed");
+  el.className = "puz-feed " + (cls || "");
+  el.innerHTML = "<span>" + text + "</span>";
+}
+function loadPuzzle(i){
+  P.i = (i + PUZZLES.length) % PUZZLES.length;
+  var p = PUZZLES[P.i];
+  P.st = fenToState(p.fen);
+  P.sel = -1; P.targets = []; P.last = null; P.step = 0; P.done = false; P.busy = false; P.pending = null;
+  P.flip = P.st.turn === BLACK;
+  $("puzPromo").hidden = true;
+  $("puzKicker").textContent = "Exercício " + (P.i + 1) + " de " + PUZZLES.length +
+    (G.solved[P.i] ? " · resolvido" : "");
+  $("puzTitle").textContent = p.title;
+  $("puzSide").className = "side " + (P.st.turn === WHITE ? "w" : "b");
+  $("puzTurn").textContent = p.prompt;
+  puzFeed("Sua vez. Toque numa peça para ver os lances.", "");
+  drawPuzzle();
+  save();
+}
+function drawPuzzle(){
+  renderBoard($("puzBoard"), P.st, {
+    flip:!!P.flip,
+    sel:P.sel, targets:P.targets, last:P.last,
+    check:inCheck(P.st, P.st.turn), epTarget:P.st.ep
+  });
+  var pct = Math.round(Object.keys(G.solved).length / PUZZLES.length * 100);
+  $("progFill").style.width = pct + "%";
+  $("progLbl").textContent = Object.keys(G.solved).length + "/" + PUZZLES.length;
+}
+function puzSquare(sq){
+  if(P.busy || P.done || P.pending) return;
+  var st = P.st;
+  if(P.sel >= 0 && P.targets.indexOf(sq) >= 0){
+    var opts = legalMoves(st).filter(function(m){ return m.from === P.sel && m.to === sq; });
+    if(opts.length > 1 && opts[0].promo){ puzPromotion(opts); return; }
+    if(opts.length){ tryPuzzleMove(opts[0]); return; }
+  }
+  var p = st.b[sq];
+  if(p && pColor(p) === st.turn){
+    P.sel = sq;
+    P.targets = legalMoves(st).filter(function(m){ return m.from === sq; }).map(function(m){ return m.to; });
+  } else { P.sel = -1; P.targets = []; }
+  drawPuzzle();
+}
+function puzPromotion(opts){
+  P.pending = opts;
+  var box = $("puzPromoOpts");
+  box.textContent = "";
+  [QUEEN, ROOK, BISHOP, KNIGHT].forEach(function(t){
+    var b = document.createElement("button");
+    b.innerHTML = pieceHTML(t, P.st.turn);
+    b.onclick = function(){
+      var m = opts.filter(function(o){ return o.promo === t; })[0];
+      P.pending = null; $("puzPromo").hidden = true;
+      if(m) tryPuzzleMove(m);
+    };
+    box.appendChild(b);
+  });
+  $("puzPromo").hidden = false;
+}
+function tryPuzzleMove(m){
+  var p = PUZZLES[P.i], uci = moveToUci(m), good;
+  var remaining = p.mateIn ? (p.mateIn * 2 - 1) - P.step : 0;
+  if(p.mateIn) good = forcesMate(P.st, m, remaining);
+  else good = (uci === p.line[P.step]);
+
+  if(!good){
+    var san = moveToSan(P.st, m);
+    P.busy = true;
+    makeMove(P.st, m); P.last = [m.from, m.to]; P.sel = -1; P.targets = [];
+    drawPuzzle();
+    sfx("bad");
+    puzFeed(san + " não resolve. Veja o que o adversário responde e tente de novo.", "no");
+    setTimeout(function(){
+      unmakeMove(P.st);
+      P.last = null; P.busy = false;
+      drawPuzzle();
+      puzFeed("Tente outra vez. " + (p.hint ? "Dica: " + p.hint : ""), "");
+    }, 1600);
+    return;
+  }
+
+  var san = moveToSan(P.st, m);
+  makeMove(P.st, m);
+  P.last = [m.from, m.to]; P.sel = -1; P.targets = []; P.step++;
+  drawPuzzle();
+  var s = gameStatus(P.st);
+  if(s.over && s.kind === "mate"){
+    P.done = true;
+    G.solved[P.i] = 1; save();
+    sfx("win");
+    puzFeed("✓ " + san + " — xeque-mate. Exercício resolvido.", "ok");
+    $("puzKicker").textContent = "Exercício " + (P.i + 1) + " de " + PUZZLES.length + " · resolvido";
+    drawPuzzle();
+    return;
+  }
+  sfx("move");
+  puzFeed(san + " — certo! Agora a resposta do adversário…", "ok");
+  P.busy = true;
+  setTimeout(function(){
+    var reply = (p.line[P.step] && findMoveByUci(P.st, p.line[P.step]));
+    if(!reply){
+      var r = searchBest(P.st, 3, 1200, true, 0);
+      reply = r && r.move;
+    }
+    if(reply){
+      makeMove(P.st, reply);
+      P.last = [reply.from, reply.to]; P.step++;
+      sfx(reply.flags & F_CAPTURE ? "capture" : "move");
+    }
+    P.busy = false;
+    drawPuzzle();
+    var st2 = gameStatus(P.st);
+    if(st2.over || (!p.mateIn && P.step >= p.line.length)){
+      P.done = true;
+      G.solved[P.i] = 1; save();
+      puzFeed(p.mateIn ? "✓ Resolvido." : "✓ Resolvido — o material é seu. Siga para o próximo.", "ok");
+    } else {
+      puzFeed(p.mateIn ? "Agora termine: dê o mate." : "Agora recolha o material.", "");
+    }
+    drawPuzzle();
+  }, 750);
+}
+function solvePuzzle(){
+  var p = PUZZLES[P.i];
+  P.st = fenToState(p.fen);
+  P.step = 0; P.sel = -1; P.targets = []; P.busy = true; P.done = true;
+  drawPuzzle();
+  var sans = [];
+  p.line.forEach(function(uci, k){
+    setTimeout(function(){
+      var m = findMoveByUci(P.st, uci);
+      if(!m) return;
+      sans.push(moveToSan(P.st, m));
+      makeMove(P.st, m);
+      P.last = [m.from, m.to];
+      drawPuzzle();
+      sfx(m.flags & F_CAPTURE ? "capture" : "move");
+      puzFeed("Solução: " + sans.join("  "), "");
+      if(k === p.line.length - 1) P.busy = false;
+    }, 650 * (k + 1));
+  });
+}
+
+
+/* ---------- análise pós-partida ---------- */
+var CLASSES = [
+  {max:20,  key:"melhor",    label:"melhores lances",  color:"var(--st-good)"},
+  {max:60,  key:"boa",       label:"lances bons",      color:"var(--st-good)"},
+  {max:130, key:"imprecisao",label:"imprecisões",      color:"var(--st-warn)"},
+  {max:300, key:"erro",      label:"erros",            color:"var(--st-serious)"},
+  {max:1e9, key:"grave",     label:"erros graves",     color:"var(--st-critical)"}
+];
+function classify(loss){
+  for(var i=0;i<CLASSES.length;i++) if(loss < CLASSES[i].max) return CLASSES[i];
+  return CLASSES[CLASSES.length-1];
+}
+var A = {rows:[], fens:[], cps:[], cur:0, running:false};
+
+/* uma busca por posição: a avaliação depois do lance i é também
+   a referência do lance i+1, então nada é calculado duas vezes */
+function runAnalysis(){
+  var st = fenToState(START_FEN);
+  A.rows = []; A.fens = [stateToFen(st)]; A.cps = []; A.cur = 0; A.running = true;
+  var evals = [], bests = [], i = 0, total = G.uci.length;
+  function measure(){
+    var r = searchBest(st, 2, 900, true, 0);
+    evals.push(r ? r.score : 0);
+    bests.push(r && r.move ? {uci:moveToUci(r.move), san:moveToSan(st, r.move)} : null);
+  }
+  measure();
+  A.cps.push(0);
+  function step(){
+    if(!A.running) return;
+    var budget = 2;
+    while(budget-- > 0 && i < total){
+      var m = findMoveByUci(st, G.uci[i]);
+      if(!m){ i = total; break; }
+      var mover = st.turn, san = moveToSan(st, m), best = bests[i], ref = evals[i];
+      makeMove(st, m);
+      A.fens.push(stateToFen(st));
+      measure();
+      var played = -evals[i+1];
+      var cp = mover === WHITE ? played : -played;
+      A.cps.push(Math.max(-1200, Math.min(1200, cp)));
+      var loss = Math.max(0, ref - played);
+      var isBest = best && best.uci === G.uci[i];
+      A.rows.push({ply:i, mover:mover, san:san, loss:isBest ? 0 : loss,
+                   best:best ? best.san : "", cls:classify(isBest ? 0 : loss)});
+      i++;
+    }
+    var pct = Math.round(i / Math.max(1, total) * 100);
+    $("anaFill").style.width = pct + "%";
+    $("anaProgressText").textContent = "Conferindo lance a lance… " + pct + "%";
+    if(i < total) setTimeout(step, 0);
+    else { A.running = false; $("anaProgress").hidden = true; $("anaBody").hidden = false; paintAnalysis(); }
+  }
+  setTimeout(step, 30);
+}
+
+function evalLabel(cp){
+  if(Math.abs(cp) < 20) return "equilibrado";
+  var v = (Math.abs(cp) / 100).toFixed(1);
+  return (cp > 0 ? "brancas +" : "pretas +") + v;
+}
+
+function chartSVG(){
+  var n = A.cps.length, W = 320, H = 132, x0 = 30, x1 = 314, y0 = 61, half = 51;
+  var maxAbs = 200, maxUp = 0, maxDn = 0;
+  A.cps.forEach(function(c){
+    maxAbs = Math.max(maxAbs, Math.abs(c));
+    if(c > 0) maxUp = Math.max(maxUp, c); else maxDn = Math.max(maxDn, -c);
+  });
+  var dom = Math.min(1000, Math.ceil(maxAbs / 100) * 100);
+  var xOf = function(i){ return n < 2 ? x0 : x0 + i * (x1 - x0) / (n - 1); };
+  var yOf = function(cp){ return y0 - Math.max(-1, Math.min(1, cp / dom)) * half; };
+  var pts = A.cps.map(function(c, i){ return xOf(i).toFixed(1) + " " + yOf(c).toFixed(1); });
+  var line = "M" + pts.join("L");
+  var area = line + "L" + xOf(n-1).toFixed(1) + " " + y0 + "L" + xOf(0).toFixed(1) + " " + y0 + "Z";
+  /* marcas dos lances mais caros, com anel da superfície */
+  var dots = A.rows.filter(function(r){ return r.cls.key === "grave" || r.cls.key === "erro"; })
+    .map(function(r){
+      return '<circle class="dot" cx="' + xOf(r.ply+1).toFixed(1) + '" cy="' + yOf(A.cps[r.ply+1]).toFixed(1) +
+             '" r="3.1" fill="' + r.cls.color + '"/>';
+    }).join("");
+  /* números de lance no eixo */
+  var ticks = "";
+  var totalMoves = Math.ceil(G.uci.length / 2);
+  var stepMove = totalMoves <= 12 ? 4 : totalMoves <= 30 ? 10 : 20;
+  for(var mv = stepMove; mv <= totalMoves; mv += stepMove){
+    var idx = Math.min(n - 1, mv * 2);
+    ticks += '<text class="axis" x="' + xOf(idx).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle">' + mv + "</text>";
+  }
+  return '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Avaliação da partida lance a lance">' +
+    '<defs>' +
+      '<clipPath id="clipUp"><rect x="0" y="0" width="' + W + '" height="' + y0 + '"/></clipPath>' +
+      '<clipPath id="clipDn"><rect x="0" y="' + y0 + '" width="' + W + '" height="' + (H - y0) + '"/></clipPath>' +
+    "</defs>" +
+    '<path class="fpos" d="' + area + '" clip-path="url(#clipUp)"/>' +
+    '<path class="fneg" d="' + area + '" clip-path="url(#clipDn)"/>' +
+    '<line class="zero" x1="' + x0 + '" y1="' + y0 + '" x2="' + x1 + '" y2="' + y0 + '"/>' +
+    '<path class="line" d="' + line + '"/>' + dots +
+    (maxUp >= dom * .8 ? '<text class="axis" x="' + (x0 - 4) + '" y="14" text-anchor="end">+' + (dom/100) + "</text>" : "") +
+    '<text class="axis" x="' + (x0 - 4) + '" y="' + (y0 + 3) + '" text-anchor="end">0</text>' +
+    (maxDn >= dom * .8 ? '<text class="axis" x="' + (x0 - 4) + '" y="' + (y0 + half + 3) + '" text-anchor="end">-' + (dom/100) + "</text>" : "") +
+    '<text class="axis" x="' + (x0 + 3) + '" y="14">brancas melhor</text>' +
+    '<text class="axis" x="' + (x0 + 3) + '" y="' + (y0 + half - 2) + '">pretas melhor</text>' +
+    '<text class="axis" x="' + (x1) + '" y="' + (H - 6) + '" text-anchor="end">lance</text>' + ticks +
+    '<line class="cross" id="anaCross" x1="' + x0 + '" y1="8" x2="' + x0 + '" y2="' + (y0 + half + 4) + '"/>' +
+    '<circle class="cur" id="anaCur" cx="' + xOf(0) + '" cy="' + yOf(A.cps[0]) + '" r="3.4"/>' +
+    '<rect id="anaHit" x="' + x0 + '" y="0" width="' + (x1 - x0) + '" height="' + (y0 + half + 6) +
+      '" fill="transparent" style="cursor:ew-resize"/>' +
+    "</svg>";
+}
+
+function setPly(k){
+  var n = A.cps.length;
+  A.cur = Math.max(0, Math.min(n - 1, k));
+  var svg = $("anaChart").querySelector("svg");
+  if(svg){
+    var W = 320, x0 = 30, x1 = 314, y0 = 61, half = 51;
+    var maxAbs = 200;
+    A.cps.forEach(function(c){ maxAbs = Math.max(maxAbs, Math.abs(c)); });
+    var dom = Math.min(1000, Math.ceil(maxAbs / 100) * 100);
+    var x = n < 2 ? x0 : x0 + A.cur * (x1 - x0) / (n - 1);
+    var y = y0 - Math.max(-1, Math.min(1, A.cps[A.cur] / dom)) * half;
+    var cross = svg.querySelector("#anaCross"), cur = svg.querySelector("#anaCur");
+    cross.setAttribute("x1", x); cross.setAttribute("x2", x);
+    cur.setAttribute("cx", x); cur.setAttribute("cy", y);
+  }
+  renderBoard($("anaBoard"), fenToState(A.fens[A.cur]), {flip:G.flip});
+  var row = A.cur > 0 ? A.rows[A.cur - 1] : null;
+  var num = row ? (Math.floor(row.ply / 2) + 1) + (row.mover === WHITE ? "." : "…") : "";
+  $("anaMoveCap").innerHTML = row
+    ? "<strong>" + num + " " + row.san + "</strong> · " + evalLabel(A.cps[A.cur]) +
+      (row.loss >= 60 && row.best ? " · melhor era <strong>" + row.best + "</strong>" : "")
+    : "Posição inicial · " + evalLabel(A.cps[0]);
+  Array.prototype.forEach.call($("anaMoments").children, function(el){
+    el.setAttribute("aria-current", String(+el.dataset.ply + 1 === A.cur));
+  });
+}
+
+function paintAnalysis(){
+  $("anaChart").innerHTML = chartSVG();
+  var hit = $("anaChart").querySelector("#anaHit");
+  function scrub(e){
+    var r = $("anaChart").querySelector("svg").getBoundingClientRect();
+    var px = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    var frac = (px / r.width - 30/320) / ((314 - 30)/320);
+    setPly(Math.round(frac * (A.cps.length - 1)));
+  }
+  var dragging = false;
+  hit.addEventListener("pointerdown", function(e){ dragging = true; hit.setPointerCapture(e.pointerId); scrub(e); });
+  hit.addEventListener("pointermove", function(e){ if(dragging) scrub(e); });
+  hit.addEventListener("pointerup", function(){ dragging = false; });
+  hit.addEventListener("pointercancel", function(){ dragging = false; });
+
+  /* resumo por classe — cor sempre acompanhada de rótulo */
+  var mine = G.mode === "ai" ? G.side : null;
+  var rows = A.rows.filter(function(r){ return mine === null ? r.mover === WHITE : r.mover === mine; });
+  $("anaChipsTitle").textContent = G.mode === "ai" ? "Como você jogou" : "Como as brancas jogaram";
+  var counts = {};
+  rows.forEach(function(r){ counts[r.cls.key] = (counts[r.cls.key] || 0) + 1; });
+  $("anaChips").innerHTML = CLASSES.map(function(c){
+      return {c:c, n:counts[c.key] || 0};
+    }).filter(function(o, i){
+      return o.n > 0 || i === 0;
+    }).map(function(o){
+      return '<span class="chip"><i style="background:' + o.c.color + '"></i><b>' + o.n + "</b> " + o.c.label + "</span>";
+    }).join("");
+
+  /* momentos decisivos: os lances mais caros */
+  var worst = rows.slice().sort(function(a, b){ return b.loss - a.loss; })
+                  .filter(function(r){ return r.loss >= 60; }).slice(0, 5);
+  $("anaMoments").innerHTML = worst.length ? worst.map(function(r){
+    var num = (Math.floor(r.ply / 2) + 1) + (r.mover === WHITE ? "." : "…");
+    return '<button class="moment" data-ply="' + r.ply + '"><i style="background:' + r.cls.color + '"></i>' +
+      "<span><span class='mv'>" + num + " " + r.san + "</span>" +
+      "<span class='why'>" + (r.best ? "melhor era " + r.best : "") + "</span></span>" +
+      "<span class='cost'>−" + (r.loss / 100).toFixed(1) + "</span></button>";
+  }).join("") : '<p class="tx">Nenhum erro grande nesta partida. Bom sinal.</p>';
+  Array.prototype.forEach.call($("anaMoments").children, function(el){
+    if(el.dataset.ply !== undefined) el.onclick = function(){ setPly(+el.dataset.ply + 1); };
+  });
+
+  $("anaDisclaimer").innerHTML = "<b>Como ler isto:</b> a análise olha dois lances à frente. " +
+    "Ela acha os erros grandes com segurança, mas não julga sutilezas de posição — para isso, " +
+    "um motor forte de verdade é outro assunto.";
+  setPly(A.cps.length - 1);
+}
+
+function openAnalysis(){
+  clockPause();
+  ["play","learn","puzzles"].forEach(function(t){ $("view-" + t).hidden = true; });
+  $("view-analysis").hidden = false;
+  window.scrollTo(0, 0);
+  var st = statusInfo();
+  $("anaResult").textContent = G.over ? st.text.replace(/^.*?— /, "").replace(/^./, function(c){ return c.toUpperCase(); }) : "Partida em andamento";
+  var moves = Math.ceil(G.uci.length / 2);
+  $("anaSub").textContent = moves + (moves === 1 ? " lance jogado" : " lances jogados") +
+    (G.mode === "ai" ? " contra o " + LEVELS[G.level].name.toLowerCase() + " (nível " + G.level + ")" : " no modo dois jogadores") + ".";
+  $("anaProgress").hidden = false;
+  $("anaBody").hidden = true;
+  $("anaFill").style.width = "0%";
+  runAnalysis();
+}
+function closeAnalysis(){
+  A.running = false;
+  $("view-analysis").hidden = true;
+  $("view-play").hidden = false;
+  window.scrollTo(0, 0);
+  clockResume();
+}
+
+/* ---------- abas ---------- */
+function showTab(name){
+  A.running = false;
+  ["play","learn","puzzles","analysis"].forEach(function(t){
+    $("view-" + t).hidden = t !== name;
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(b){
+    b.setAttribute("aria-selected", String(b.dataset.tab === name));
+  });
+  if(name === "puzzles" && !P.st) loadPuzzle(0);
+  if(name === "play") clockResume(); else clockPause();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- início ---------- */
+function boot(saved){
+  saved = saved || {};
+  G.mode = saved.mode || "ai";
+  G.clockCfg = saved.clockCfg || "0";
+  G.level = saved.level || 2;
+  G.side = (saved.side === BLACK) ? BLACK : WHITE;
+  G.hints = saved.hints !== false;
+  G.sound = saved.sound !== false;
+  G.installHidden = !!saved.installHidden;
+  (saved.done || []).forEach(function(k){ G.done[k] = 1; });
+  (saved.solved || []).forEach(function(k){ G.solved[k] = 1; });
+
+  G.st = fenToState(START_FEN);
+  G.uci = []; G.sans = [];
+  (saved.moves || []).forEach(function(u){
+    var m = findMoveByUci(G.st, u);
+    if(!m) return;
+    G.sans.push(moveToSan(G.st, m));
+    makeMove(G.st, m);
+    G.uci.push(u);
+    G.last = [m.from, m.to];
+  });
+  G.flip = saved.flip !== undefined ? !!saved.flip : (G.mode === "ai" && G.side === BLACK);
+  clockInit();
+
+  $("installCard").hidden = G.installHidden;
+  $("rowLevel").style.display = G.mode === "ai" ? "" : "none";
+  $("rowSide").style.display = G.mode === "ai" ? "" : "none";
+
+  seg("segMode", function(){ return G.mode; }, function(v){
+    G.mode = v;
+    $("rowLevel").style.display = v === "ai" ? "" : "none";
+    $("rowSide").style.display = v === "ai" ? "" : "none";
+    newGame();
+  });
+  seg("segLevel", function(){ return G.level; }, function(v){ G.level = +v; drawGame(); save(); });
+  seg("segSide", function(){ return G.side === WHITE ? "w" : "b"; }, function(v){
+    G.side = v === "b" ? BLACK : WHITE; newGame();
+  });
+  seg("segClock", function(){ return G.clockCfg; }, function(v){
+    G.clockCfg = v; newGame();
+  });
+  seg("segHints", function(){ return G.hints ? "1" : "0"; }, function(v){
+    G.hints = v === "1"; drawGame(); save();
+  });
+  seg("segSound", function(){ return G.sound ? "1" : "0"; }, function(v){
+    G.sound = v === "1"; save(); if(G.sound) sfx("move");
+  });
+
+  $("board").addEventListener("click", function(e){
+    var sq = sqFromEvent(e);
+    if(sq >= 0) selectSquare(sq);
+  });
+  $("puzBoard").addEventListener("click", function(e){
+    var sq = sqFromEvent(e);
+    if(sq >= 0) puzSquare(sq);
+  });
+  var newArmed = false, newTimer = null, newLabel = $("btnNew").innerHTML;
+  function disarmNew(){
+    newArmed = false; clearTimeout(newTimer); $("btnNew").innerHTML = newLabel;
+  }
+  $("btnNew").onclick = function(){
+    if(!G.uci.length || newArmed){ disarmNew(); newGame(); return; }
+    newArmed = true;
+    $("btnNew").innerHTML = '<span class="ic" aria-hidden="true">!</span>Confirmar?';
+    newTimer = setTimeout(disarmNew, 3000);
+  };
+  $("btnUndo").onclick = undo;
+  $("btnHint").onclick = showHint;
+  $("btnFlip").onclick = function(){ G.flip = !G.flip; drawGame(); save(); };
+  $("installClose").onclick = function(){
+    G.installHidden = true; $("installCard").hidden = true; save();
+  };
+  $("btnAnalyze").onclick = openAnalysis;
+  $("anaBack").onclick = closeAnalysis;
+  $("puzPrev").onclick = function(){ loadPuzzle(P.i - 1); };
+  $("puzNext").onclick = function(){ loadPuzzle(P.i + 1); };
+  $("puzSolve").onclick = solvePuzzle;
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(b){
+    b.onclick = function(){ showTab(b.dataset.tab); };
+  });
+
+  $("brandMark").innerHTML = iconHTML(2);
+  Array.prototype.forEach.call(document.querySelectorAll("[data-icon]"), function(el){
+    el.innerHTML = iconHTML(+el.dataset.icon);
+  });
+  renderLessonList();
+  drawGame();
+  maybeAI();
+
+  try{
+    if(window.claude && window.claude.hot && window.claude.hot.snapshot){
+      window.claude.hot.snapshot(function(){
+        return {moves:G.uci, mode:G.mode, level:G.level, side:G.side, flip:G.flip, clockCfg:G.clockCfg,
+                hints:G.hints, sound:G.sound, installHidden:G.installHidden,
+                done:Object.keys(G.done), solved:Object.keys(G.solved)};
+      });
+    }
+  }catch(e){}
+}
+
+var hot = window.claude && window.claude.hot;
+if(hot && hot.ready) hot.ready(function(d){ boot(Object.keys(d || {}).length ? d : load()); });
+else boot(load());
+})();
+/*UI-END*/
+</script>
