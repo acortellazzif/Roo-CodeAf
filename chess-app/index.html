@@ -278,6 +278,35 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 .chart .cur{fill:var(--ink);stroke:var(--surface);stroke-width:1.4}
 .chart .dot{stroke:var(--surface);stroke-width:1.4}
 .chart-note{font-size:11.5px;color:var(--ink-3);margin:8px 4px 0;text-align:center}
+.replay{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:11px}
+.replay .tico{width:15px;height:15px;fill:currentColor;display:block}
+.replay button{height:42px;min-width:46px;border-radius:11px;background:var(--surface);border:1px solid var(--line);
+  font-size:15px;color:var(--ink-2);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
+.replay button:active{background:var(--surface-2)}
+.replay button[disabled]{opacity:.35}
+.replay .play{min-width:64px;background:var(--green);color:#F4F7F1;border-color:transparent;font-size:16px}
+:root[data-theme="dark"] .replay .play{color:#12150F}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .replay .play{color:#12150F}}
+.replay .pos{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);min-width:52px;text-align:center;
+  font-variant-numeric:tabular-nums}
+.replay-opt{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:9px;font-size:12px;color:var(--ink-3)}
+
+.verdict{display:flex;flex-direction:column;gap:9px;padding:12px 13px;border-radius:12px;margin-top:11px;
+  background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.verdict[hidden]{display:none}
+.verdict .top{display:flex;align-items:center;gap:8px}
+.badge-v{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;
+  font-size:11.5px;font-weight:600;color:var(--ink);background:var(--surface-2);border:1px solid var(--line)}
+.badge-v i{width:8px;height:8px;border-radius:50%;flex:none}
+.verdict .who{font-size:11.5px;color:var(--ink-3)}
+.verdict .cost{margin-left:auto;font-family:var(--f-mono);font-size:12.5px;color:var(--danger);flex:none}
+.verdict .cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.verdict .cmp>div{padding:9px 11px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.verdict .cmp .lbl{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+.verdict .cmp .mv{font-family:var(--f-mono);font-size:16px;font-weight:600;margin-top:3px;color:var(--ink)}
+.verdict .cmp .best{border-color:var(--green)}
+.verdict .cmp .best .mv{color:var(--green-ink)}
+.verdict .tip{font-size:12.5px;line-height:1.5;color:var(--ink-2)}
 .chips{display:flex;flex-wrap:wrap;gap:7px}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;
   background:var(--surface);border:1px solid var(--line);font-size:12.5px;color:var(--ink-2)}
@@ -452,8 +481,24 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
             <p class="chart-note">Toque no gráfico e arraste para percorrer a partida.</p>
           </figure>
           <div>
+            <button class="btn-wide" id="btnReplay" style="margin-bottom:12px">Rever a partida lance a lance</button>
             <div class="board mini" id="anaBoard"></div>
             <p class="mini-cap" id="anaMoveCap"></p>
+            <div class="replay">
+              <button id="rpStart" aria-label="Voltar ao início"></button>
+              <button id="rpPrev" aria-label="Lance anterior"></button>
+              <button class="play" id="rpPlay" aria-label="Reproduzir"></button>
+              <button id="rpNext" aria-label="Próximo lance"></button>
+              <span class="pos" id="rpPos">0/0</span>
+            </div>
+            <div class="replay-opt">
+              <span id="rpStopLbl">Parar nos meus erros</span>
+              <div class="seg" id="segStop">
+                <button data-v="1" aria-pressed="true">Sim</button>
+                <button data-v="0" aria-pressed="false">Não</button>
+              </div>
+            </div>
+            <div class="verdict" id="anaVerdict" hidden></div>
           </div>
           <div>
             <h3 style="margin-bottom:9px" id="anaChipsTitle">Como você jogou</h3>
@@ -2165,17 +2210,23 @@ function solvePuzzle(){
 
 /* ---------- análise pós-partida ---------- */
 var CLASSES = [
-  {max:20,  key:"melhor",    label:"melhores lances",  color:"var(--st-good)"},
-  {max:60,  key:"boa",       label:"lances bons",      color:"var(--st-good)"},
-  {max:130, key:"imprecisao",label:"imprecisões",      color:"var(--st-warn)"},
-  {max:300, key:"erro",      label:"erros",            color:"var(--st-serious)"},
-  {max:1e9, key:"grave",     label:"erros graves",     color:"var(--st-critical)"}
+  {max:20,  key:"melhor",    label:"melhores lances", one:"Melhor lance", color:"var(--st-good)",
+   tip:"Foi o lance que o motor também escolheria."},
+  {max:60,  key:"boa",       label:"lances bons",     one:"Bom lance",    color:"var(--st-good)",
+   tip:"Não é o melhor, mas não custou quase nada."},
+  {max:130, key:"imprecisao",label:"imprecisões",     one:"Imprecisão",   color:"var(--st-warn)",
+   tip:"Deixou escapar uma vantagem pequena."},
+  {max:300, key:"erro",      label:"erros",           one:"Erro",         color:"var(--st-serious)",
+   tip:"Custou material ou uma vantagem clara."},
+  {max:1e9, key:"grave",     label:"erros graves",    one:"Erro grave",   color:"var(--st-critical)",
+   tip:"Um lance que muda o rumo da partida."}
 ];
 function classify(loss){
   for(var i=0;i<CLASSES.length;i++) if(loss < CLASSES[i].max) return CLASSES[i];
   return CLASSES[CLASSES.length-1];
 }
-var A = {rows:[], fens:[], cps:[], cur:0, running:false};
+var A = {rows:[], fens:[], cps:[], cur:0, running:false,
+         playing:false, timer:null, stopOnMistakes:true, showingBest:false};
 
 /* uma busca por posição: a avaliação depois do lance i é também
    a referência do lance i+1, então nada é calculado duas vezes */
@@ -2206,7 +2257,8 @@ function runAnalysis(){
       var loss = Math.max(0, ref - played);
       var isBest = best && best.uci === G.uci[i];
       A.rows.push({ply:i, mover:mover, san:san, loss:isBest ? 0 : loss,
-                   best:best ? best.san : "", cls:classify(isBest ? 0 : loss)});
+                   best:best ? best.san : "", bestUci:best ? best.uci : "",
+                   cls:classify(isBest ? 0 : loss)});
       i++;
     }
     var pct = Math.round(i / Math.max(1, total) * 100);
@@ -2265,7 +2317,7 @@ function chartSVG(){
     (maxDn >= dom * .8 ? '<text class="axis" x="' + (x0 - 4) + '" y="' + (y0 + half + 3) + '" text-anchor="end">-' + (dom/100) + "</text>" : "") +
     '<text class="axis" x="' + (x0 + 3) + '" y="14">brancas melhor</text>' +
     '<text class="axis" x="' + (x0 + 3) + '" y="' + (y0 + half - 2) + '">pretas melhor</text>' +
-    '<text class="axis" x="' + (x1) + '" y="' + (H - 6) + '" text-anchor="end">lance</text>' + ticks +
+    ticks +
     '<line class="cross" id="anaCross" x1="' + x0 + '" y1="8" x2="' + x0 + '" y2="' + (y0 + half + 4) + '"/>' +
     '<circle class="cur" id="anaCur" cx="' + xOf(0) + '" cy="' + yOf(A.cps[0]) + '" r="3.4"/>' +
     '<rect id="anaHit" x="' + x0 + '" y="0" width="' + (x1 - x0) + '" height="' + (y0 + half + 6) +
@@ -2288,8 +2340,10 @@ function setPly(k){
     cross.setAttribute("x1", x); cross.setAttribute("x2", x);
     cur.setAttribute("cx", x); cur.setAttribute("cy", y);
   }
-  renderBoard($("anaBoard"), fenToState(A.fens[A.cur]), {flip:G.flip});
   var row = A.cur > 0 ? A.rows[A.cur - 1] : null;
+  var played = row ? [nameSq(G.uci[row.ply].slice(0,2)), nameSq(G.uci[row.ply].slice(2,4))] : null;
+  A.showingBest = false;
+  renderBoard($("anaBoard"), fenToState(A.fens[A.cur]), {flip:G.flip, last:played});
   var num = row ? (Math.floor(row.ply / 2) + 1) + (row.mover === WHITE ? "." : "…") : "";
   $("anaMoveCap").innerHTML = row
     ? "<strong>" + num + " " + row.san + "</strong> · " + evalLabel(A.cps[A.cur]) +
@@ -2298,12 +2352,99 @@ function setPly(k){
   Array.prototype.forEach.call($("anaMoments").children, function(el){
     el.setAttribute("aria-current", String(+el.dataset.ply + 1 === A.cur));
   });
+  paintVerdict();
+  $("rpPos").textContent = A.cur + "/" + (A.cps.length - 1);
+  $("rpPrev").disabled = A.cur === 0;
+  $("rpStart").disabled = A.cur === 0;
+  $("rpNext").disabled = A.cur >= A.cps.length - 1;
+}
+
+/* ---------- veredito do lance ---------- */
+function isMine(row){ return G.mode === "ai" ? row.mover === G.side : true; }
+function moveNum(row){ return (Math.floor(row.ply / 2) + 1) + (row.mover === WHITE ? "." : "…"); }
+
+function paintVerdict(){
+  var el = $("anaVerdict"), row = A.cur > 0 ? A.rows[A.cur - 1] : null;
+  if(!row){ el.hidden = true; return; }
+  el.hidden = false;
+  if(!isMine(row)){
+    el.innerHTML = '<div class="tip">' + moveNum(row) + " " + row.san + " — lance " +
+      (G.mode === "ai" ? "do computador" : (row.mover === WHITE ? "das brancas" : "das pretas")) + ".</div>";
+    return;
+  }
+  var c = row.cls, bad = row.loss >= 60 && row.best;
+  var who = G.mode === "ai" ? "seu lance" : (row.mover === WHITE ? "lance das brancas" : "lance das pretas");
+  var html = '<div class="top"><span class="badge-v"><i style="background:' + c.color + '"></i>' + c.one + "</span>" +
+    '<span class="who">' + moveNum(row) + " · " + who + "</span>" +
+    (row.loss >= 60 ? '<span class="cost">−' + (row.loss / 100).toFixed(1) + "</span>" : "") + "</div>";
+  if(bad){
+    html += '<div class="cmp">' +
+      '<div class="yours"><div class="lbl">você jogou</div><div class="mv">' + row.san + "</div></div>" +
+      '<div class="best"><div class="lbl">o melhor era</div><div class="mv">' + row.best + "</div></div></div>" +
+      '<button class="btn-ghost" id="btnBest">Ver como ficaria com ' + row.best + "</button>";
+  } else {
+    html += '<div class="tip">' + moveNum(row) + " " + row.san + " — " + c.tip + "</div>";
+  }
+  el.innerHTML = html;
+  if(bad) $("btnBest").onclick = toggleBest;
+}
+
+/* mostra a posição que teria surgido com o lance do motor */
+function toggleBest(){
+  var row = A.cur > 0 ? A.rows[A.cur - 1] : null;
+  if(!row || !row.bestUci) return;
+  if(A.showingBest){ setPly(A.cur); return; }
+  var st = fenToState(A.fens[A.cur - 1]);
+  var m = findMoveByUci(st, row.bestUci);
+  if(!m) return;
+  makeMove(st, m);
+  A.showingBest = true;
+  renderBoard($("anaBoard"), st, {flip:G.flip, last:[m.from, m.to]});
+  $("anaMoveCap").innerHTML = "Assim ficaria depois de <strong>" + row.best + "</strong> — compare com o seu lance.";
+  var b = $("btnBest");
+  if(b){ b.textContent = "Voltar ao seu lance " + row.san; b.onclick = function(){ setPly(A.cur); }; }
+}
+
+/* ---------- replay ---------- */
+var TICO = {
+  start:'<svg class="tico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2.4v14H6zM20 5l-9.5 7 9.5 7z"/></svg>',
+  prev :'<svg class="tico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5l-9.5 7L16 19z"/></svg>',
+  next :'<svg class="tico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l9.5 7L8 19z"/></svg>',
+  play :'<svg class="tico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5l13 7.5-13 7.5z"/></svg>',
+  pause:'<svg class="tico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg>'
+};
+function stopReplay(){
+  A.playing = false;
+  clearTimeout(A.timer);
+  $("rpPlay").innerHTML = TICO.play;
+  $("rpPlay").setAttribute("aria-label", "Reproduzir");
+}
+function startReplay(fromStart){
+  if(fromStart || A.cur >= A.cps.length - 1) setPly(0);
+  A.playing = true;
+  $("rpPlay").innerHTML = TICO.pause;
+  $("rpPlay").setAttribute("aria-label", "Pausar");
+  stepReplay();
+}
+function stepReplay(){
+  clearTimeout(A.timer);
+  if(!A.playing) return;
+  if(A.cur >= A.cps.length - 1){ stopReplay(); return; }
+  A.timer = setTimeout(function(){
+    if(!A.playing) return;
+    setPly(A.cur + 1);
+    var row = A.rows[A.cur - 1];
+    var pause = A.stopOnMistakes && row && isMine(row) && row.loss >= 60;
+    if(pause){ stopReplay(); return; }
+    stepReplay();
+  }, A.rows[A.cur] && isMine(A.rows[A.cur]) ? 1100 : 800);
 }
 
 function paintAnalysis(){
   $("anaChart").innerHTML = chartSVG();
   var hit = $("anaChart").querySelector("#anaHit");
   function scrub(e){
+    stopReplay();
     var r = $("anaChart").querySelector("svg").getBoundingClientRect();
     var px = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
     var frac = (px / r.width - 30/320) / ((314 - 30)/320);
@@ -2319,6 +2460,7 @@ function paintAnalysis(){
   var mine = G.mode === "ai" ? G.side : null;
   var rows = A.rows.filter(function(r){ return mine === null ? r.mover === WHITE : r.mover === mine; });
   $("anaChipsTitle").textContent = G.mode === "ai" ? "Como você jogou" : "Como as brancas jogaram";
+  $("rpStopLbl").textContent = G.mode === "ai" ? "Parar nos meus erros" : "Parar nos erros";
   var counts = {};
   rows.forEach(function(r){ counts[r.cls.key] = (counts[r.cls.key] || 0) + 1; });
   $("anaChips").innerHTML = CLASSES.map(function(c){
@@ -2366,6 +2508,7 @@ function openAnalysis(){
 }
 function closeAnalysis(){
   A.running = false;
+  stopReplay();
   $("view-analysis").hidden = true;
   $("view-play").hidden = false;
   window.scrollTo(0, 0);
@@ -2375,6 +2518,7 @@ function closeAnalysis(){
 /* ---------- abas ---------- */
 function showTab(name){
   A.running = false;
+  stopReplay();
   ["play","learn","puzzles","analysis"].forEach(function(t){
     $("view-" + t).hidden = t !== name;
   });
@@ -2462,6 +2606,21 @@ function boot(saved){
   };
   $("btnAnalyze").onclick = openAnalysis;
   $("anaBack").onclick = closeAnalysis;
+  $("rpStart").innerHTML = TICO.start;
+  $("rpPrev").innerHTML = TICO.prev;
+  $("rpNext").innerHTML = TICO.next;
+  $("rpPlay").innerHTML = TICO.play;
+  $("btnReplay").onclick = function(){
+    startReplay(true);
+    $("anaBoard").scrollIntoView({block:"center", behavior:"smooth"});
+  };
+  $("rpPlay").onclick = function(){ A.playing ? stopReplay() : startReplay(false); };
+  $("rpNext").onclick = function(){ stopReplay(); setPly(A.cur + 1); };
+  $("rpPrev").onclick = function(){ stopReplay(); setPly(A.cur - 1); };
+  $("rpStart").onclick = function(){ stopReplay(); setPly(0); };
+  seg("segStop", function(){ return A.stopOnMistakes ? "1" : "0"; }, function(v){
+    A.stopOnMistakes = v === "1";
+  });
   $("puzPrev").onclick = function(){ loadPuzzle(P.i - 1); };
   $("puzNext").onclick = function(){ loadPuzzle(P.i + 1); };
   $("puzSolve").onclick = solvePuzzle;

@@ -24,6 +24,13 @@ fez, e os momentos decisivos com o lance que era melhor. Arraste o dedo pelo
 gráfico para percorrer a partida no tabuleiro. É uma análise rasa, de dois
 lances à frente: acha os erros grandes, não julga sutilezas.
 
+**Replay comentado** — dentro da análise, a partida se repete sozinha lance a
+lance. Cada lance seu recebe um veredito: melhor lance, bom lance, imprecisão,
+erro ou erro grave. Nos lances ruins o replay para sozinho e mostra lado a
+lado o que você jogou e o que era melhor, com um botão que põe no tabuleiro a
+posição que teria surgido com o lance certo. Dá para desligar a parada
+automática e andar de lance em lance no controle abaixo do tabuleiro.
+
 **Aprender** — onze lições curtas, na ordem, do tabuleiro ao xeque-mate. Cada
 uma traz tabuleiros de verdade: uns em que você toca numa peça e vê todos os
 lances legais dela, outros que avançam lance a lance (roque, *en passant*,
